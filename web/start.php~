@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+ <div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href="#" onclick="history.go(-1);">back</a></div>
+
+<br><br>
+<table>
+<tr>
+<td width=300px>
+
+<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listsproject'>Insert</a> data in the database </div>  
+<hr>
+<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllstudies&project=all'>Show</a> existing data</div>
+<hr>
+<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllreports&project=all'>Show</a> existing reports</div>
+</td>
+<td>
+
+</td>
+</tr>
+</table>
+<footer><br><br><br><br><br><br><br>
+ <small>&copy; 2017 Francesco Sisini </small>
+</footer>
+</body>
+</html>
