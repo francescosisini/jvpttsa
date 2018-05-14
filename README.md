@@ -6,5 +6,6 @@ An ultrasound jugular venous pulse tracing  task specific algorithm  communicati
 - works with every ultrasound machine
 - plot graph in real time
 - store data on central repositories
+-------------------
 ![ ](logo.gif)
 
