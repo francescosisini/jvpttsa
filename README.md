@@ -6,6 +6,8 @@ An ultrasound jugular venous pulse tracing  task specific algorithm  communicati
 - works with every ultrasound machine
 - plot graph in real time
 - store data on central repositories
+## Requirements
+[DCMTK] (https://github.com/DCMTK/dcmtk)
 ## Credits
 DICOM support from [deanvaughan.org](http://deanvaughan.org/wordpress/dicom-php-class/)
 
