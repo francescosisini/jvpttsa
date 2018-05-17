@@ -27,7 +27,7 @@ import ij.measure.ResultsTable;
 */
 
 
-public class RTJVP21 implements PlugInFilter , KeyListener{
+public class TM_RTJVP01 implements PlugInFilter , KeyListener{
 
    
    
