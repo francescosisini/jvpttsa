@@ -24,7 +24,7 @@ import ij.measure.ResultsTable;
 */
 
 
-public class TM_RTJVP20 implements PlugInFilter {
+public class TM_RTJVP00 implements PlugInFilter {
 
    
    
