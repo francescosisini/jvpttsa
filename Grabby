@@ -1,0 +1,3 @@
+ mplayer tv:// -tv driver=v4l2:width=720:height=576:outfmt=uyvy:device=/dev/video1:input=0:fps=25:alsa:amode=1:forcechan=2:audiorate=48000:adevice=plughw.2,0:forceaudio:immedia temode=0 -ao sdl,alsa
+
+mplayer tv:// -tv driver=v4l2:device=/dev/video1:input=0:norm=PAL
