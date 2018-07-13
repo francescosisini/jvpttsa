@@ -6,3 +6,8 @@
 - [ ] Add new `action` to `controller.php` to manage incoming plugin `GET` data
 ## Hardware
 - [ ] implement embeddd solution
+
+# Done:
+-[x] installed mysql
+-[x] installed phpmyadmin
+-[x] installed dcmtk
