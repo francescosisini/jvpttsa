@@ -8,6 +8,7 @@ An ultrasound jugular venous pulse tracing  task specific algorithm  communicati
 - store data on central repositories
 ## Requirements
 - [DCMTK] (https://github.com/DCMTK/dcmtk)
+-- sudo apt-get install dcmtk
 - [ImageJ] (https://github.com/imagej/imagej)
 ## Credits
 DICOM support from [deanvaughan.org](http://deanvaughan.org/wordpress/dicom-php-class/)
