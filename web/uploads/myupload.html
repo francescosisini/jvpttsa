@@ -1,43 +1,51 @@
 <html>
-   
-   <head>
-      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
-   </head>
-   
-   <body ng-app='myapp'>
-
- <div ng-controller="userCtrl">
   
-  <input type='file' name='file' id='file'><br/>
-  <input type='button' value='Upload' id='upload' ng-click='upload()' >
+  <head>
+    <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+  </head>
   
-  <p>{{ response.name }}</p>
- </div>
+  <body ng-app='myapp'>
+    
+    
+    <div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='../start.php'><img src=../img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"></div>
+    
+    <br><br><br>
+    
+    <div ng-controller="userCtrl">
       
-      <script>
+      <input type='file' name='file' id='file'><br/>
+      <input type='button' value='Upload' id='upload' ng-click='upload()' >
+      <p>{{siso}}</p>
+      <p>{{response}}</p>
+      
+    </div>
+    
+    <script>
       var upload= angular.module('myapp', []);
-
-upload.controller('userCtrl', ['$scope', '$http', function ($scope, $http) {
- $scope.upload = function(){
- 
-  var fd = new FormData();
-  var files = document.getElementById('file').files[0];
-  fd.append('file',files);
-
-  // AJAX request
-  $http({
-   method: 'post',
-   url: 'upload.php',
-   data: fd,
-   headers: {'Content-Type': undefined},
-  }).then(function successCallback(response) { 
-    // Store response data
-    $scope.response = response.data;
-  });
- }
- 
-}]);
-			
+      
+      upload.controller('userCtrl', ['$scope', '$http', function ($scope, $http) {
+      
+      $scope.upload = function(){
+      
+      var fd = new FormData();
+      var files = document.getElementById('file').files[0];
+      fd.append('file',files);
+      
+      // AJAX request
+      $http({
+      method: 'post',
+      url: 'upload.php',
+      data: fd,
+      headers: {'Content-Type': undefined},
+      }).then(function successCallback(response) { 
+      // Store response data
+      $scope.response = response.data;
+      $scope.siso=response.ok;
+      });
+      }
+      
+      }]);
+      
       </script>
       
    </body>

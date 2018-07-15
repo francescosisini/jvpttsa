@@ -8,12 +8,15 @@
 <table>
 <tr>
 <td width=300px>
-
-<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listsproject'>Insert</a> data in the database </div>  
-<hr>
-<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllstudies&project=all'>Show</a> existing data</div>
-<hr>
-<li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllreports&project=all'>Show</a> existing reports</div>
+  <ul>
+    <li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=uploadFile'>Upload</a> file </div>  
+      <hr>
+  <li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listsproject'>Insert</a> data in the database </div>  
+    <hr>
+  <li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllstudies&project=all'>Show</a> existing data</div>
+    <hr>
+  <li><div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllreports&project=all'>Show</a> existing reports</div>
+</ul>
 </td>
 <td>
 

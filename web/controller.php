@@ -242,10 +242,12 @@ if($a=='browse'){
 	$project=$_GET['project'];
 	$mod=$_GET['mod'];
 	if(!is_dir($path)){
-		Redirect("DICOM.php?path=$path&project=$project&mod=$mod");	
+		Redirect("DICOM.php?path=$path&project=$project&mod=$mod");
 	}
 	Redirect("browse.php?path=$path&project=$project&mod=$mod");
 }
+
+
 if($a=='addScreenshot'){
 	$suid=$_GET['study'];
 	$path=$_GET['path'];
@@ -430,6 +432,10 @@ if($a=='loadreport'){
 
 if($a=='listsproject'){
 	Redirect("listProject.php");
+}
+
+if($a=='uploadFile'){
+	Redirect("./uploads/myupload.html");
 }
 
 if($a=='savereport'){
