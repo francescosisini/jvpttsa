@@ -1,6 +1,6 @@
 # Todo
 - [ ] upload DICOM file from browser
-- - [x]  sudo chown www-data jvp/uploads/
+- - [x]  sudo chown www-data jvp/uploads/; sudo chown www-data studies/
 - - [x] Big file can't be uploaded:
     Resolved: changing 
     Maximum allowed size for uploaded files.                                                         
