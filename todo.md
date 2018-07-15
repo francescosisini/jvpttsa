@@ -6,6 +6,7 @@
     Maximum allowed size for uploaded files.                                                         
     http://php.net/upload-max-filesize                                                               
     upload_max_filesize = 50M
+    post_max_size =	0
     in /etc/php/7.2/apache2/php.ini 
 - - [ ]  needs uploaded notification
 - [ ] POST jvp orphan-data from imageJ 
