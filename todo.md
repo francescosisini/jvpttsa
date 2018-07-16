@@ -16,4 +16,4 @@
 - - [x] KeyPress event detection
 - - [x] JVP dataset recording
 - - [x] HTTP data transmission
-- - [ ] Selection Patient ID o Study ID for reconciliation
+- - [X] Selection Patient ID o Study ID for reconciliation
