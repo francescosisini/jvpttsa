@@ -1,7 +1,8 @@
 
 
 
-
+import java.net.*;
+import java.io.*;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
@@ -27,14 +28,17 @@ import ij.measure.ResultsTable;
 */
 
 
-public class TM_RTJVP01 implements PlugInFilter , KeyListener{
+public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,MouseListener{
 
    
    
   
+    boolean kl=false;//Used to flak keylistner setted
     
+    boolean fstr=true;
+    float pdt=0;
     private static final double rho = 1000;
-	private double outputZSpacing = 1.0;
+    private double outputZSpacing = 1.0;
     private int nprofiles = 1;
     int width=300;
     private ImagePlus imp;
@@ -46,8 +50,8 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     
     int currentRoi=0;  
     private int mediaRange=10;
-    double outerOscillationLimit=10; 
-    Roi mainROI;
+    double outerOscillationLimit=90; 
+    
     int mstackSize=10000;
     int tho=10,gtho=30;
   
@@ -57,6 +61,7 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     /*Campionamenti per secondo*/
     double fps=20;
     double f_fps=1./fps;
+    private double t_scale_max=10;
     
     /*Campionamento di un ciclo di JVP e ECG*/
     double[] jvp_cicle; //cm^2
@@ -65,6 +70,8 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     double[] t_ecg_cicle;
     
     /*Set di coordinate per il plot del tracciato JVP*/
+    int selInx=0;
+    int MAXSEL=(int)(fps*t_scale_max);
     float []xp;
     float []yp;
     int []ixp;
@@ -73,33 +80,71 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     int xLimiSup=0;
     
     /*Opzioni dialogo*/
-    public boolean isRealTime=false;
+    public boolean isRealTime=true;
     public double pixelXcm=130;
     boolean useCov=true,useGL=true,useGGL=true;
-	private double t_scale_max;
-	private int T_cicle;
-	private double ijv_length;
-	private double compliance_xul;
-	private double csa_x;
-	
-	boolean record=false;
-	boolean exit=false;
-	
-	
-	ImageWindow win;
-	ImageCanvas canvas;
-
-    public int setup(String arg, ImagePlus imp) {
-	
-	return DOES_ALL;
-    }
     
+    private int T_cicle;
+    private double ijv_length;
+    private double compliance_xul;
+    private double csa_x;
+    
+    boolean record=false;
+    boolean exit=false;
+    
+    
+    ImageWindow win;
+    ImageCanvas canvas;
+
+   
+    
+
+public void mousePressed(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		int offscreenX = canvas.offScreenX(x);
+		int offscreenY = canvas.offScreenY(y);
+		showDialog(imp);
+		IJ.log("Mouse pressed: "+offscreenX+","+offscreenY+modifiers(e.getModifiers()));
+		//IJ.log("Right button: "+((e.getModifiers()&Event.META_MASK)!=0));
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		IJ.log("mouseReleased: ");
+	}
+	
+	public void mouseDragged(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		int offscreenX = canvas.offScreenX(x);
+		int offscreenY = canvas.offScreenY(y);
+		IJ.log("Mouse dragged: "+offscreenX+","+offscreenY+modifiers(e.getModifiers()));
+	}
+
+	public static String modifiers(int flags) {
+		String s = " [ ";
+		if (flags == 0) return "";
+		if ((flags & Event.SHIFT_MASK) != 0) s += "Shift ";
+		if ((flags & Event.CTRL_MASK) != 0) s += "Control ";
+		if ((flags & Event.META_MASK) != 0) s += "Meta (right button) ";
+		if ((flags & Event.ALT_MASK) != 0) s += "Alt ";
+		s += "]";
+		if (s.equals(" [ ]"))
+ 			s = " [no modifiers]";
+		return s;
+	}
+
+	public void mouseExited(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {}	
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseMoved(MouseEvent e) {}
+
     
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         char keyChar = e.getKeyChar();
         int flags = e.getModifiers();
-        
+        e.consume(); 
         /*
          * Uscita
          */
@@ -108,8 +153,8 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
         /*
          * Record on/off
          */
-        if(keyCode==82)record=!record;
-        IJ.log("Recording="+record);
+        if(keyCode==82)record=!record;//R
+        
         /*
          * Controllo centro ROI di acquisizione
          * */
@@ -128,11 +173,46 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
          */
         if(keyCode==65) outerOscillationLimit++; //A
         if(keyCode==83) outerOscillationLimit--; //S
-        IJ.log("keyPressed: keyCode=" + keyCode + " (" + KeyEvent.getKeyText(keyCode) + ")");
-        IJ.log("Parameter xrc="+xrc+"; yrc="+yrc+"; GL="+tho+"; R="+outerOscillationLimit);
+	if(keyCode==85) //U
+	{
+		try{
+			String urlString = "http://localhost/jvp/controller.php?action=imagej&datax=";
+			//Add jvp data
+			String datax="";
+			String datay="";
+			for(int i=0;i<MAXSEL-1;i++)
+			{			
+			    datax=datax+xp[i]+";";
+			    datay=datay+yp[i]+";";
+			}
+			URL url = new URL(urlString+datax+"&datay="+datay);
+			IJ.log(String.valueOf(url.toString()));
+			URLConnection conn = url.openConnection();
+			InputStream is = conn.getInputStream();
+			int i;
+			char c;
+			String st="";
+			while((i = is.read())!=-1) {
+			    c = (char)i;
+			    st=st+c;
+			    // prints character
+			    
+			}
+			IJ.log(st);
+			
+		}catch(Exception ex)
+		{
+			IJ.log(ex.toString());
+		}	
+	}	
+	
+
+
+        //IJ.log("keyPressed: keyCode=" + keyCode + " (" + KeyEvent.getKeyText(keyCode) + ")");
+        //IJ.log("Parameter xrc="+xrc+"; yrc="+yrc+"; GL="+tho+"; R="+outerOscillationLimit);
         
         
-       //IJ.getInstance().keyPressed(e); // hand off event to ImageJ
+	//IJ.getInstance().keyPressed(e); // hand off event to ImageJ
     }
     public void imageClosed(ImagePlus imp) {
        /* if (win!=null)
@@ -147,83 +227,74 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     public void keyTyped(KeyEvent e) {}
     public void imageOpened(ImagePlus imp) {}
     public void imageUpdated(ImagePlus imp) {}
+
+    public int setup(String arg, ImagePlus imp) {
+	
+	return DOES_ALL;
+    }
     
     public void run(ImageProcessor ip) {
-    	
-    	
-    	ovl=new Overlay();	
-    	imp = WindowManager.getImage("JVP");
-    	if(imp==null)
-    	{
+
+	ovl=new Overlay();
+	imp = WindowManager.getImage("JVP");
+	win = imp.getWindow();
+	
+    	if(win==null)
+	    {
     		IJ.showMessage("Creare un'imagine vuota chiamata JVP");
     		return;
-    	}
-    	
+	    }
+    	win.addKeyListener(this);
     	imp.setOverlay(ovl);
+	canvas = win.getCanvas();
+	canvas.addKeyListener(this);
+	//canvas.addMouseListener(this);
+	/*
+	ImageWindow win = imp.getWindow();
+	
+	win.addKeyListener(this);
+	
+	ImagePlus.addImageListener(this);
+	
+	
+	
+	*/
+	//canvas.addMouseMotionListener(this);
     	
-    	
-        win = imp.getWindow();
-       
-        canvas = win.getCanvas();
-        win.removeKeyListener(IJ.getInstance());
-        canvas.removeKeyListener(IJ.getInstance());
-        win.addKeyListener(this);
-        canvas.addKeyListener(this);
         
-        //imp.addImageListener(this);
-        IJ.log("addKeyListener");
+	
+        
          
          
     	
 	
   
-	
+	Roi[] ra;
 	manager = RoiManager.getInstance(); 
 	if(manager==null)
 	{
-		IJ.showMessage("Aprire il ROIManager dal menu Analze->Tool");
-		return;
-	}
-	Roi[] ra=manager.getRoisAsArray();
-
-
-	
-	
-	if (ra.length<1)
+	    //IJ.showMessage("Aprire il ROIManager dal menu Analze->Tool");
+	    //return;
+	}else
 	    {
-		IJ.error("Selezionare la ROI della IJV su almeno un'immagine.");
-		return;
+		ra=manager.getRoisAsArray();
 	    }
-
-	mainROI = ra[0];
+		
 	
-	if(mainROI==null)IJ.showMessage("Nessuna ROI selezionata");
-	Polygon fp=mainROI.getPolygon();
-
-	
-	if (imp==null) {
-	    IJ.noImage();
-	    return;
-	}
 	int stackSize = mstackSize;
 	Roi roi = imp.getRoi();
 	int roiType = roi!=null?roi.getType():0;
-	
-	if (!showDialog(imp))	//need to update the dialog
-	    return;
+
+	if (!showDialog(imp))	  return;
 	if(!isRealTime)
 	{
 		ImageStack stack = imp.getStack();
 		mstackSize = stack.getSize();
-		
 	}
-	
 	/*Parametri che devono essere configurati in base al paziente*/
 	t_scale_max=10;
 	T_cicle=1;
 	ijv_length=20.0/100; //Distanza punto di insonificazione dall'atrio
-	
-	
 	/*To be initiated*/
 	jvp_cicle=new double[(int)fps];
 	ecg_cicle=new double[(int)fps];
@@ -235,61 +306,46 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
 	 * PLOT
 	 */
 	
-	   xp = new float[stackSize]; 
-       yp = new float[stackSize]; 
-       ixp = new int[stackSize]; 
-       iyp = new int[stackSize]; 
-     
-
-      PlotWindow.noGridLines = false; // draw grid lines
-      plot = new Plot("JVP","Time (s)","CSA (cm^2)");
-      
-      plot.setLimits(xLimiInf, t_scale_max, 0, 10);
-      plot.setLineWidth(1);
-     
-      
-      // add label
-      plot.setColor(Color.blue);
-      
-      plot.changeFont(new Font("Helvetica", Font.PLAIN, 24));
-      plot.addLabel(0.15, 0.95, "JVP");
-
-      plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
-      plot.setColor(Color.blue);
-      //pw=plot.show();
-      
-	
-	long startTime = System.currentTimeMillis();	
-	currentRoi=0;
-	initialize(mainROI);
-	
-
-	    
-	/**
-	   Cross correlation between signal acquired in two differet frames 
-	*/
+	xp = new float[MAXSEL]; 
+	yp = new float[MAXSEL]; 
+	ixp = new int[stackSize]; 
+	iyp = new int[stackSize]; 
 	
 	
-	int z=nprofiles;
+	PlotWindow.noGridLines = false; // draw grid lines
 	
-	/**
-	   STEP 1 crea l'array dei ritardi
-	 */
-	detectJugularWall(z);
-	rt.show("Results");
-	//plot.show();
-	
-
-	/**
-	   STEP 3 ricalcola la ROI sui ritardi
-	 */
-	
-	IJ.showStatus(IJ.d2s(((System.currentTimeMillis()-startTime)/1000.0),2)+" seconds");
-
+       
+       long startTime = System.currentTimeMillis();	
+       currentRoi=0;
+       initialize();
+       
+       
+       
+       /**
+	  Cross correlation between signal acquired in two differet frames 
+       */
+       
+       
+       int z=nprofiles;
+       
+       /**
+	  STEP 1 crea l'array dei ritardi
+       */
+       detectJugularWall(z);
+       rt.show("Results");
+       plot.show();
+       
+       
+       /**
+	  STEP 3 ricalcola la ROI sui ritardi
+       */
+       
+       IJ.showStatus(IJ.d2s(((System.currentTimeMillis()-startTime)/1000.0),2)+" seconds");
+       
     }
-
-
-
+    
+    
+    
     
     //Applica un filtro del valor medio all'array dei ritardi
     public double[] doAverageFilterToDelay(double []v)
@@ -335,12 +391,9 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     while(nxt)
     {
     	if(!isRealTime && mt>(mstackSize-1)) nxt=false;
-    	
-    	
-    	plotOverImage(ixp, iyp);
-    	
-    	if (IJ.escapePressed()||exit==true)
-		{IJ.beep();  return;}
+	//plotOverImage(ixp, iyp);
+	if (IJ.escapePressed()||exit==true)
+	    {IJ.beep();  return;}
     	
     	if(System.currentTimeMillis()-ct>(T_cicle*1000) || (li>=fps)) 
 		{
@@ -353,7 +406,10 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
     		t_ecg_cicle=new double[(int)fps];
 
 		}
-    	    	
+
+	/*
+	  reset m if more than t_scale_max has passed
+	 */
     	if((System.currentTimeMillis()-st>(t_scale_max*1000))&&isRealTime) 
     		{
     		st=System.currentTimeMillis();
@@ -370,7 +426,17 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
         	BufferedImage capture = new Robot().createScreenCapture(screenRect);
         	imp.setHideOverlay(false);
         	imp.setImage(capture);
-        	
+		//Added 16 07 2018
+		if(!kl)
+		    {
+			kl=true;
+			win = imp.getWindow();
+			win.addKeyListener(this);
+			canvas = win.getCanvas();
+			canvas.addKeyListener(this);
+			canvas.removeKeyListener(IJ.getInstance());
+			//canvas.addMouseListener(this);
+		    }
         }
         catch(Exception ex)
         {
@@ -427,69 +493,77 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
 		int[] yr=new int[nprofiles];
     	for(int mu=1;mu<=z;mu++)
     	{
-    		
-    		double hth=myang[mu-1];
-    		xr[mu-1]=(int)Math.round( xrc+(distance[mu-1])*(Math.cos(hth)));
-    		yr[mu-1]=(int)Math.round( yrc+(distance[mu-1])*(Math.sin(hth)));
-    		
-    		
-    	}
-    	
-    	PolygonRoi myROI= new PolygonRoi(xr, yr,xr.length, Roi.POLYGON);
-    	
-    	imp.setRoi(myROI);
+	    double hth=myang[mu-1];
+	    xr[mu-1]=(int)Math.round( xrc+(distance[mu-1])*(Math.cos(hth)));
+	    yr[mu-1]=(int)Math.round( yrc+(distance[mu-1])*(Math.sin(hth)));
+	}
+	PolygonRoi myROI= new PolygonRoi(xr, yr,xr.length, Roi.POLYGON);
+	imp.setRoi(myROI);
     	Analyzer a=new Analyzer(imp);
     	ImageStatistics ist=imp.getStatistics();
-    	if(record)
-    	{
-    		manager.add(imp,myROI,mt);
-    		a.saveResults(ist,myROI);
-    	}
-    		
     	
-		imp.setSliceWithoutUpdate(mt+1);
-		double area=ist.area/(pixelXcm*pixelXcm)*(1.0/(100*100));//area in m^2
-		double stime=(System.currentTimeMillis()-st)/1000.;
-		/*Aggiorna i campioni ECG e JVP*/
-		jvp_cicle[li]=area;
-		t_jvp_cicle[li]=(System.currentTimeMillis()-ct)/1000.;
-		//Sostituire con un ECG detection ALG
-		ecg_cicle[li]=area;
-		t_ecg_cicle[li]=(System.currentTimeMillis()-ct-180)/1000.;
+	imp.setSliceWithoutUpdate(mt+1);
+	double area=ist.area/(pixelXcm*pixelXcm)*(1.0/(100*100));//area in m^2
+	double stime=(System.currentTimeMillis()-st)/1000.;
+	/*Aggiorna i campioni ECG e JVP*/
+	jvp_cicle[li]=area;
+	t_jvp_cicle[li]=(System.currentTimeMillis()-ct)/1000.;
+	//Sostituire con un ECG detection ALG
+	ecg_cicle[li]=area;
+	t_ecg_cicle[li]=(System.currentTimeMillis()-ct-180)/1000.;
+	
+	double pressure=(area-csa_x)*(1./compliance_xul)*(1.0/133.3);
+	
+	if(record)
+	    {
+		if(fstr)
+		    {
+			xp = new float[MAXSEL]; 
+			yp = new float[MAXSEL];
+			fstr=false;
+			if(pw!=null)
+			    pw.close();
+			plot = new Plot("JVP","Time (s)","Units");
+			plot.setLimits(xLimiInf, t_scale_max, -3, 5);
+			plot.setLineWidth(3);
+			plot.setColor(Color.blue);
+			plot.changeFont(new Font("Helvetica", Font.PLAIN, 24));
+			plot.addLabel(0.15, 0.95, "JVP");
+			plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
+			plot.setColor(Color.blue);
+			pw=plot.show();
+		    }
 		
-		double pressure=(area-csa_x)*(1./compliance_xul)*(1.0/133.3);
+    		//manager.add(imp,myROI,mt);
+    		//a.saveResults(ist,myROI);
+		xp[selInx]=(float)stime;
+		yp[selInx]=(float)pressure;
+		plot.addPoints(xp, yp,PlotWindow.LINE);
+		plot.addPoints(xp, yp,PlotWindow.X);
 		
-		//Aggiorna il Tracciato
-		xp[mt]=(float)stime;
-		yp[mt]=(float)pressure;
-		
-		ixp[mt-1]=(int)(stime*((imp.getWindow().getWidth())/(double)t_scale_max));
-		iyp[0]=300;
-		
-		
-		if(area<3)
-		{
-			iyp[mt-1]=400-(int)(pressure*10);
-		}
+		if((selInx<MAXSEL-1)&&stime<9.5)
+		    selInx++;
 		else
-		{
-			if(mt>1)
-			iyp[mt-1]=iyp[mt-2];
-			else
-				iyp[mt-1]=300;
-			
-		}
-		plotOverImage(ixp, iyp);
-		plot.addPoints(xp, yp, 1);
-		
-		
-		manager.select(0);
-		
-		IJ.wait((int)fps);
-		
-		
-		li++;
-		}
+		    {
+			fstr=true;
+			selInx=0;
+			xp = new float[MAXSEL]; 
+			yp = new float[MAXSEL];
+		    }
+	    }else
+	    {
+		//plot= new Plot("JVP","Time (s)","Units");
+		selInx=0;
+		fstr=true;
+		 
+	    }
+	
+	//plotOverImage(ixp, iyp);
+	
+	//manager.select(0);
+	IJ.wait((int)fps);
+	li++;
+    }
     }
     
     private void calculateModelParametrs() {
@@ -688,78 +762,78 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener{
 
     
     boolean showDialog(ImagePlus imp) {
-	    
-	    Calibration cal = imp.getCalibration();
-	    String units = cal.getUnits();
-	    if (cal.pixelWidth==0.0)
-		cal.pixelWidth = 1.0;
-	    double outputSpacing = cal.pixelDepth;
-	    GenericDialog gd2 = new GenericDialog("Radial Reslice");
-	    
-	    gd2.addCheckbox("Acquisizione in Real-Time", false);
-	    gd2.addNumericField("Pixel per cm", 130, 0);
-	    gd2.addNumericField("Soglia GL", 0, 0);
-	    gd2.addNumericField("Soglia gradiente GL", 0, 0);
-	    gd2.addNumericField("Incremento angolare in gradi (iag)", 1, 0);
-	    gd2.addNumericField("Finestra per il filtro mediano (espressa in iag)",10,0);
-	    gd2.addNumericField("Dl+",10,2);
-	    
-	   
-	  
-	    gd2.showDialog();
-	    if (gd2.wasCanceled())
-		return false;
-	  
-	    if (cal.pixelDepth==0.0) cal.pixelDepth = 1.0;
-	    isRealTime=gd2.getNextBoolean();
-	    pixelXcm=gd2.getNextNumber();
-	    
-	    tho=new Double(gd2.getNextNumber()).intValue();
-	    if(tho==0) useGL=false;
-	    gtho=new Double(gd2.getNextNumber()).intValue();
-	    if(gtho==0) useGGL=false;
-	    nprofiles = new Double(360 / gd2.getNextNumber()).intValue();
-	    mediaRange=(int)gd2.getNextNumber();
-	    outerOscillationLimit=(double)gd2.getNextNumber();
-	    myang=new double[nprofiles];	    
-	    return true;
-	}
+	
+	Calibration cal = imp.getCalibration();
+	String units = cal.getUnits();
+	if (cal.pixelWidth==0.0)
+	    cal.pixelWidth = 1.0;
+	double outputSpacing = cal.pixelDepth;
+	GenericDialog gd2 = new GenericDialog("Radial Reslice");
+	
+	gd2.addCheckbox("Acquisizione in Real-Time", true);
+	gd2.addNumericField("Pixel per cm", 130, 0);
+	gd2.addNumericField("Soglia GL", 30, 0);
+	gd2.addNumericField("Soglia gradiente GL", 0, 0);
+	gd2.addNumericField("Incremento angolare in gradi (iag)", 1, 0);
+	gd2.addNumericField("Finestra per il filtro mediano (espressa in iag)",10,0);
+	gd2.addNumericField("Dl+",90,2);
+	
+	
+	
+	gd2.showDialog();
+	if (gd2.wasCanceled())
+	    return false;
+	
+	if (cal.pixelDepth==0.0) cal.pixelDepth = 1.0;
+	isRealTime=gd2.getNextBoolean();
+	pixelXcm=gd2.getNextNumber();
+	
+	tho=new Double(gd2.getNextNumber()).intValue();
+	if(tho==0) useGL=false;
+	gtho=new Double(gd2.getNextNumber()).intValue();
+	if(gtho==0) useGGL=false;
+	nprofiles = new Double(360 / gd2.getNextNumber()).intValue();
+	mediaRange=(int)gd2.getNextNumber();
+	outerOscillationLimit=(double)gd2.getNextNumber();
+	myang=new double[nprofiles];	    
+	return true;
+    }
     
-	int[] getRoiCenter(Roi roi){
-		int xc=0,yc=0;
-		Polygon proi=roi.getPolygon();
-		for(int i=0;i<proi.npoints;i++)
-		{
-			xc=xc+proi.xpoints[i];
-			yc=yc+proi.ypoints[i];
-		}
-		xc=xc/proi.npoints;
-		yc=yc/proi.npoints;
-		int ret[]={xc,yc};
-		return ret;
+    int[] getRoiCenter(Roi roi){
+	int xc=0,yc=0;
+	Polygon proi=roi.getPolygon();
+	for(int i=0;i<proi.npoints;i++)
+	    {
+		xc=xc+proi.xpoints[i];
+		yc=yc+proi.ypoints[i];
+	    }
+	xc=xc/proi.npoints;
+	yc=yc/proi.npoints;
+	int ret[]={xc,yc};
+	return ret;
 	}
     
 	//ImagePlus
-	void initialize(Roi croi) {
-		 double a = 0.0;	//angle increment
-		 double ang = 0.0;	//current angle
-		 int caz[]=getRoiCenter(croi);
-		 xrc=caz[0];yrc=caz[1];
-		 a = (Math.PI/180.0)*(360.0/nprofiles);
-		 if (nprofiles==0) {
-				IJ.error("Radial reslice", "Output Z spacing ("+IJ.d2s(outputZSpacing,0)+" pixels) is too large.");
-				return;
-		 }
-		 IJ.resetEscape();
-		 for (int i=0; i<nprofiles; i++)	{
-				ang = 0+a*(i+1);
-				if (ang < 0) ang += 2*Math.PI;
-				myang[i]=ang;
-				/*if (IJ.escapePressed())
-					{IJ.beep();  return;}*/
-				
-		 }
+	void initialize() {
+	    double a = 0.0;	//angle increment
+	    double ang = 0.0;	//current angle
+	    
+	    xrc=200;yrc=200;
+	    a = (Math.PI/180.0)*(360.0/nprofiles);
+	    if (nprofiles==0) {
+		IJ.error("Radial reslice", "Output Z spacing ("+IJ.d2s(outputZSpacing,0)+" pixels) is too large.");
+		return;
+	    }
+	    IJ.resetEscape();
+	    for (int i=0; i<nprofiles; i++)	{
+		ang = 0+a*(i+1);
+		if (ang < 0) ang += 2*Math.PI;
+		myang[i]=ang;
+		/*if (IJ.escapePressed())
+		  {IJ.beep();  return;}*/
 		
+	    }
+	    
 	}
     
       
