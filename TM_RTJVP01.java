@@ -34,7 +34,7 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,Mous
    
   
     boolean kl=false;//Used to flak keylistner setted
-    
+    String PID="John Doe";
     boolean fstr=true;
     float pdt=0;
     private static final double rho = 1000;
@@ -176,11 +176,12 @@ public void mousePressed(MouseEvent e) {
 	if(keyCode==85) //U
 	{
 		try{
-			String urlString = "http://localhost/jvp/controller.php?action=imagej&datax=";
-			//Add jvp data
-			String datax="";
-			String datay="";
-			for(int i=0;i<MAXSEL-1;i++)
+		    String PID2=URLEncoder.encode(PID, "UTF-8");
+		    String urlString = "http://localhost/jvp/controller.php?action=imagej&PID="+PID2+"&datax=";
+		    //Add jvp data
+		    String datax="";
+		    String datay="";
+		    for(int i=0;i<MAXSEL-1;i++)
 			{			
 			    datax=datax+xp[i]+";";
 			    datay=datay+yp[i]+";";
@@ -777,7 +778,7 @@ public void mousePressed(MouseEvent e) {
 	gd2.addNumericField("Incremento angolare in gradi (iag)", 1, 0);
 	gd2.addNumericField("Finestra per il filtro mediano (espressa in iag)",10,0);
 	gd2.addNumericField("Dl+",90,2);
-	
+	gd2.addStringField("Patient ID",PID);
 	
 	
 	gd2.showDialog();
@@ -795,7 +796,8 @@ public void mousePressed(MouseEvent e) {
 	nprofiles = new Double(360 / gd2.getNextNumber()).intValue();
 	mediaRange=(int)gd2.getNextNumber();
 	outerOscillationLimit=(double)gd2.getNextNumber();
-	myang=new double[nprofiles];	    
+	myang=new double[nprofiles];
+	PID=gd2.getNextString();
 	return true;
     }
     
