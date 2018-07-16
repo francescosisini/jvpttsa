@@ -14,5 +14,6 @@
 - - [ ] orphan-data reconciliation
 - [ ] OnLine CSA measurements
 - - [x] KeyPress event detection
-- - [ ] JVP dataset recording
+- - [x] JVP dataset recording
 - - [x] HTTP data transmission
+- - [ ] Selection Patient ID o Study ID for reconciliation
