@@ -13,5 +13,6 @@
 - - [ ] Implements controller action
 - - [ ] orphan-data reconciliation
 - [ ] OnLine CSA measurements
-- - [ ] ROI tracing over IJV image to set center coordinates and ray dimension
-- - [ ] HTTP data transmission
+- - [x] KeyPress event detection
+- - [ ] JVP dataset recording
+- - [x] HTTP data transmission
