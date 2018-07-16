@@ -11,4 +11,7 @@
 - - [x]  needs uploaded notification
 - [ ] POST jvp orphan-data from imageJ
 - - [ ] Implements controller action
-- [ ] orphan-data reconciliation
+- - [ ] orphan-data reconciliation
+- [ ] OnLine CSA measurements
+- - [ ] ROI tracing over IJV image to set center coordinates and ray dimension
+- - [ ] HTTP data transmission
