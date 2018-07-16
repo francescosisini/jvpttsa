@@ -25,6 +25,29 @@ require_once 'db.php';
 //echo $_GET['action']; 
 $a= $_GET['action'];
 
+if($a=='imagej'){
+$db = new Db();
+	$dx=$_GET['datax'];
+	$dy=$_GET['datay'];
+	$pid=$_GET['PID'];
+$x=explode(";",$dx);
+$y=explode(";",$dy);
+print ("ORPAHN STUDY: ".$pid);
+ $eln=count ($x);
+for($i=0;$i<$eln;$i++)
+		{
+			
+				$query="INSERT INTO `orph_sonogram`( `PID`, `time`, `csa`) VALUES";
+				$query=$query."('$pid',$x[$i],$y[$i])";
+				$db->query($query);
+				echo $query;
+			}
+	//$query="delete from `sonogram` where videoclipid=".$video;
+	//$db->query($query);
+	//Redirect("loadStudy.php?study=$SUID");
+
+}
+
 if($a=='deleteSonogram'){
 	$db = new Db();
 	$video=$_GET['video'];
