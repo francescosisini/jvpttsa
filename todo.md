@@ -23,3 +23,5 @@
 - - - [x] add  Left/Right
 - - - [x] add  j123 position
 - - - [x] add  pixel/cm (remove from initial dialog)
+- - [x] Pause aquisition to make measurament on the image
+- - [x] Set acquisition parameters
