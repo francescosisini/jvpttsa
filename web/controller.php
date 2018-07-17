@@ -1,51 +1,78 @@
-<!--
-Questo software è composto da una web application in PHP su MySQL. Lo scopo 
-è quello di amministtrare i dati raccolti durante le indgini diagnostiche del 
-Centro di Malattie Vascolari dell'università di Ferrara.
+/*
+<!-- Questo software e' composto da una web application in PHP su MySQL. Lo scopo 
+    e' quello di amministtrare i dati raccolti durante le indgini diagnostiche del 
+    Centro di Malattie Vascolari dell'università di Ferrara.
     Copyright (C) <2017>  <Francesco Sisini>
-
-    This program is free software: you can redistribute it and/or modify
+This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     (at your option) any later version.
+         This program is distributed in the hope that it will be useful,
+         but WITHOUT ANY WARRANTY; without even the implied warranty of
+             MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+             GNU General Public License for more details.
+                 You should have received a copy of the GNU General Public License
+                 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-
+*/
 <?php 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require_once 'db.php';
-//echo $_GET['action']; 
 $a= $_GET['action'];
-
 if($a=='imagej'){
-$db = new Db();
+//=urlString+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax="; 
+    $db = new Db();
 	$dx=$_GET['datax'];
 	$dy=$_GET['datay'];
 	$pid=$_GET['PID'];
-$x=explode(";",$dx);
-$y=explode(";",$dy);
-print ("ORPAHN STUDY: ".$pid);
- $eln=count ($x);
-for($i=0;$i<$eln;$i++)
+    $videon=$_GET['videon'];
+    $jpos=$_GET['jpos']; // J 1, 2 e 3
+    $lor=$_GET['lor']; //Left Rigt
+    $repo=$_GET['repository']; //Left Rigt
+    $x=explode(";",$dx);
+    $y=explode(";",$dy);
+    print ("Loaded ".$pid);
+    
+/*Se lo studio non è già presente  lo inserisce */
+    $sql="SELECT * FROM `us_study` WHERE StudyInstanceUID='$pid'";
+    $rs=$db->select($sql);
+    $rn=count($rs,COUNT_NORMAL);
+    if($rn==0){
+        //Inserisce lo studio prima del video
+        $query="INSERT INTO `us_study`(`studyInstanceUID`, `patientName`, `patientFamilyName`, `patientID`,";
+        $query=$query." `studyDateTime`,`dataEntryDateTime`, `researchID`) VALUES ";
+        $query=$query."('$pid','','','$pid',now(),now(),'$repo')";
+        $db -> query($query);
+        print($query);	
+    }
+/*Inserisce il video*/
+    $query="Select * from us_videoclip where instanceNumber=$videon and studyInstanceUID='$pid'";
+    $rs=$db->select($query);
+    $rn=count($rs,COUNT_NORMAL);
+    if($rn==0)
 		{
-			
-				$query="INSERT INTO `orph_sonogram`( `PID`, `time`, `csa`) VALUES";
-				$query=$query."('$pid',$x[$i],$y[$i])";
-				$db->query($query);
-				echo $query;
-			}
+			$query="INSERT INTO `us_videoclip`( `instanceNumber`, `studyInstanceUID`, `dataOraVideo`, `dataEntryDateTime`,";
+			$query=$query." `RightOrLeftIJV`, `Jposition123`, `phdx`, `umx`, `phsx`, `umy`, `effectiveDuration`, `numberOfFrames`,";
+			$query=$query." `fileName`) VALUES ($videon,'$pid',now(),now(),'$lor',$jpos,1,1,1,1,1,1,1)";
+            print($query);
+		}
+    $db -> query($query);
+    $vid=$db->lastid();
+    
+    
+/* inserisce i dati*/
+    $eln=count ($x);
+    for($i=0;$i<$eln;$i++)
+		{
+            $query="INSERT INTO `sonogram`( `videoclipID`, `number`, `CSA`,`processID`,`perimeter`) VALUES";
+            $query=$query."('$vid',$x[$i],$y[$i],1,$y[$i])";
+            $db->query($query);
+            echo $query;
+        }
 	//$query="delete from `sonogram` where videoclipid=".$video;
 	//$db->query($query);
 	//Redirect("loadStudy.php?study=$SUID");
-
 }
 
 if($a=='deleteSonogram'){

@@ -31,8 +31,11 @@ import ij.measure.ResultsTable;
 public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,MouseListener{
 
    
-   
-  
+    String repository="unifeweb";
+    boolean paused=false;
+    int Jpos=2;
+    int videon=1;
+    String LoR="";
     boolean kl=false;//Used to flak keylistner setted
     String PID="John Doe";
     boolean fstr=true;
@@ -81,7 +84,7 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,Mous
     
     /*Opzioni dialogo*/
     public boolean isRealTime=true;
-    public double pixelXcm=130;
+    public double pixelXcm=0;
     boolean useCov=true,useGL=true,useGGL=true;
     
     private int T_cicle;
@@ -171,13 +174,24 @@ public void mousePressed(MouseEvent e) {
         /*
          * Controllo lunghezza raggio
          */
-        if(keyCode==65) outerOscillationLimit++; //A
-        if(keyCode==83) outerOscillationLimit--; //S
+        if(keyCode==83) outerOscillationLimit++; //A
+	if(keyCode==80){
+	    paused=!paused; //P Pause the Robot
+	}
+        if(keyCode==65) outerOscillationLimit--; //S
+	if(keyCode==84) //T
+	    showSettingsDialog(imp);
+
 	if(keyCode==85) //U
 	{
+	    /*GET Patiant data before upload */
+	    if(!showUploadDialog (imp)) return;
+	    
 		try{
 		    String PID2=URLEncoder.encode(PID, "UTF-8");
-		    String urlString = "http://localhost/jvp/controller.php?action=imagej&PID="+PID2+"&datax=";
+		    
+		    String urlString = "http://localhost/jvp/controller.php?action=imagej";
+		    urlString=urlString+"&repository="+repository+"&videon="+videon+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax=";
 		    //Add jvp data
 		    String datax="";
 		    String datay="";
@@ -391,78 +405,81 @@ public void mousePressed(MouseEvent e) {
     boolean nxt=true;
     while(nxt)
     {
-    	if(!isRealTime && mt>(mstackSize-1)) nxt=false;
-	//plotOverImage(ixp, iyp);
-	if (IJ.escapePressed()||exit==true)
-	    {IJ.beep();  return;}
-    	
-    	if(System.currentTimeMillis()-ct>(T_cicle*1000) || (li>=fps)) 
-		{
-    		calculateModelParametrs();
-    		li=0;
-    		ct=System.currentTimeMillis();
-    		jvp_cicle=new double[(int)fps];
-    		ecg_cicle=new double[(int)fps];
-    		t_jvp_cicle=new double[(int)fps];
-    		t_ecg_cicle=new double[(int)fps];
+	
+	    
+		if(!isRealTime && mt>(mstackSize-1)) nxt=false;
+		if (IJ.escapePressed()||exit==true)
+		    {IJ.beep();  return;}
 
-		}
-
-	/*
-	  reset m if more than t_scale_max has passed
-	 */
-    	if((System.currentTimeMillis()-st>(t_scale_max*1000))&&isRealTime) 
-    		{
-    		st=System.currentTimeMillis();
-    		mt=0;
-    		
-    		}
-    	
-    	mt++;
-    	
-    	Rectangle screenRect = new Rectangle(0,0,500,500);
-       if(isRealTime)
-       {
-    	try{
-        	BufferedImage capture = new Robot().createScreenCapture(screenRect);
-        	imp.setHideOverlay(false);
-        	imp.setImage(capture);
-		//Added 16 07 2018
-		if(!kl)
+		
+		if(System.currentTimeMillis()-ct>(T_cicle*1000) || (li>=fps)) 
 		    {
-			kl=true;
-			win = imp.getWindow();
-			win.addKeyListener(this);
-			canvas = win.getCanvas();
-			canvas.addKeyListener(this);
-			canvas.removeKeyListener(IJ.getInstance());
-			//canvas.addMouseListener(this);
+			calculateModelParametrs();
+			li=0;
+			ct=System.currentTimeMillis();
+			jvp_cicle=new double[(int)fps];
+			ecg_cicle=new double[(int)fps];
+			t_jvp_cicle=new double[(int)fps];
+			t_ecg_cicle=new double[(int)fps];
+			
 		    }
-        }
-        catch(Exception ex)
-        {
-        	IJ.log("CAZ...");
-        }
-       }else
-       {
-    	   imp.setSlice(mt+1);
-       }
-    	
-    	double distance[]=new double[z];
-    	currentRoi=0;
-    	//Ciclo su 2PI
-    	for(int mu=1;mu<=z;mu++)
-    	{
-    		/* Calcolo il raggio ellittico */
-    		double hth=myang[mu-1];
-    		int xf=(int)Math.round( xrc+(outerOscillationLimit)*(Math.cos(hth)));
-    		int yf=(int)Math.round( yrc+(outerOscillationLimit)*(Math.sin(hth)));
-    		
-    		int xi=(int)xrc;
-    		int yi=(int)yrc;
-    		Line ln=new Line(xi,yi,xf,yf);
-    		//drawLine(xi, yi, xf, yf, imp);
-    
+
+		if(!paused){
+		/*
+		  reset m if more than t_scale_max has passed
+		*/
+		if((System.currentTimeMillis()-st>(t_scale_max*1000))&&isRealTime) 
+		    {
+			st=System.currentTimeMillis();
+			mt=0;
+			
+		    }
+		
+		mt++;
+		
+		Rectangle screenRect = new Rectangle(0,0,500,500);
+		if(isRealTime&&!paused)
+		    {
+			try{
+			    BufferedImage capture = new Robot().createScreenCapture(screenRect);
+			    imp.setHideOverlay(false);
+			    imp.setImage(capture);
+			    //Added 16 07 2018
+			    if(!kl)
+				{
+				    kl=true;
+				    win = imp.getWindow();
+				    win.addKeyListener(this);
+				    canvas = win.getCanvas();
+				    canvas.addKeyListener(this);
+				    canvas.removeKeyListener(IJ.getInstance());
+				    //canvas.addMouseListener(this);
+				}
+			}
+			catch(Exception ex)
+			    {
+				IJ.log("CAZ...");
+			    }
+		    }else
+		    {
+			imp.setSlice(mt+1);
+		    }
+		
+		double distance[]=new double[z];
+		currentRoi=0;
+		//Ciclo su 2PI
+		for(int mu=1;mu<=z;mu++)
+		    {
+			/* Calcolo il raggio ellittico */
+			double hth=myang[mu-1];
+			int xf=(int)Math.round( xrc+(outerOscillationLimit)*(Math.cos(hth)));
+			int yf=(int)Math.round( yrc+(outerOscillationLimit)*(Math.sin(hth)));
+			
+			int xi=(int)xrc;
+			int yi=(int)yrc;
+			Line ln=new Line(xi,yi,xf,yf);
+			//drawLine(xi, yi, xf, yf, imp);
+			
 			imp.setSlice(mt);
 			imp.setRoi(ln,true);		
 			double[] s1=ln.getPixels();
@@ -471,99 +488,103 @@ public void mousePressed(MouseEvent e) {
 			//mdel+=findMax(s1, s2);
 			int kk=0;
 			if(useGL==true)
-			{
+			    {
 				mdel+=gl_treshold(s1, tho);
 				kk++;
-			}
+			    }
 			if(useGGL==true)
-			{
+			    {
 				mdel+=ggl_treshold(s1, gtho);
 				kk++;
-			}
+			    }
 			
 			distance[mu-1]=(double)mdel/(double)kk;
-	    }
-    	/*
-    	 * Post processing distanze raggi di controllo
-    	 */
-    	distance=doAverageFilterToDelay(distance);
+		    }
+
+
+	
+		/*
+		 * Post processing distanze raggi di controllo
+		 */
+		distance=doAverageFilterToDelay(distance);
 		/*
 		 * Definizione della ROI
 		 */
-    	int[] xr=new int[nprofiles];
+		int[] xr=new int[nprofiles];
 		int[] yr=new int[nprofiles];
-    	for(int mu=1;mu<=z;mu++)
-    	{
-	    double hth=myang[mu-1];
-	    xr[mu-1]=(int)Math.round( xrc+(distance[mu-1])*(Math.cos(hth)));
-	    yr[mu-1]=(int)Math.round( yrc+(distance[mu-1])*(Math.sin(hth)));
-	}
-	PolygonRoi myROI= new PolygonRoi(xr, yr,xr.length, Roi.POLYGON);
-	imp.setRoi(myROI);
-    	Analyzer a=new Analyzer(imp);
-    	ImageStatistics ist=imp.getStatistics();
-    	
-	imp.setSliceWithoutUpdate(mt+1);
-	double area=ist.area/(pixelXcm*pixelXcm)*(1.0/(100*100));//area in m^2
-	double stime=(System.currentTimeMillis()-st)/1000.;
-	/*Aggiorna i campioni ECG e JVP*/
-	jvp_cicle[li]=area;
-	t_jvp_cicle[li]=(System.currentTimeMillis()-ct)/1000.;
-	//Sostituire con un ECG detection ALG
-	ecg_cicle[li]=area;
-	t_ecg_cicle[li]=(System.currentTimeMillis()-ct-180)/1000.;
-	
-	double pressure=(area-csa_x)*(1./compliance_xul)*(1.0/133.3);
-	
-	if(record)
-	    {
-		if(fstr)
+		for(int mu=1;mu<=z;mu++)
 		    {
-			xp = new float[MAXSEL]; 
-			yp = new float[MAXSEL];
-			fstr=false;
-			if(pw!=null)
-			    pw.close();
-			plot = new Plot("JVP","Time (s)","Units");
-			plot.setLimits(xLimiInf, t_scale_max, -3, 5);
-			plot.setLineWidth(3);
-			plot.setColor(Color.blue);
-			plot.changeFont(new Font("Helvetica", Font.PLAIN, 24));
-			plot.addLabel(0.15, 0.95, "JVP");
-			plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
-			plot.setColor(Color.blue);
-			pw=plot.show();
+			double hth=myang[mu-1];
+			xr[mu-1]=(int)Math.round( xrc+(distance[mu-1])*(Math.cos(hth)));
+			yr[mu-1]=(int)Math.round( yrc+(distance[mu-1])*(Math.sin(hth)));
 		    }
+		PolygonRoi myROI= new PolygonRoi(xr, yr,xr.length, Roi.POLYGON);
+		imp.setRoi(myROI);
+		Analyzer a=new Analyzer(imp);
+		ImageStatistics ist=imp.getStatistics();
 		
-    		//manager.add(imp,myROI,mt);
-    		//a.saveResults(ist,myROI);
-		xp[selInx]=(float)stime;
-		yp[selInx]=(float)pressure;
-		plot.addPoints(xp, yp,PlotWindow.LINE);
-		plot.addPoints(xp, yp,PlotWindow.X);
+		imp.setSliceWithoutUpdate(mt+1);
+		double area=ist.area/(pixelXcm*pixelXcm)*(1.0/(100*100));//area in m^2
+		double stime=(System.currentTimeMillis()-st)/1000.;
+		/*Aggiorna i campioni ECG e JVP*/
+		jvp_cicle[li]=area;
+		t_jvp_cicle[li]=(System.currentTimeMillis()-ct)/1000.;
+		//Sostituire con un ECG detection ALG
+		ecg_cicle[li]=area;
+		t_ecg_cicle[li]=(System.currentTimeMillis()-ct-180)/1000.;
 		
-		if((selInx<MAXSEL-1)&&stime<9.5)
-		    selInx++;
-		else
+		double pressure=(area-csa_x)*(1./compliance_xul)*(1.0/133.3);
+		
+		if(record)
 		    {
-			fstr=true;
+			if(fstr)
+			    {
+				xp = new float[MAXSEL]; 
+				yp = new float[MAXSEL];
+				fstr=false;
+				if(pw!=null)
+				    pw.close();
+				plot = new Plot("JVP","Time (s)","Units");
+				plot.setLimits(xLimiInf, t_scale_max, 0, 2);
+				plot.setLineWidth(3);
+				plot.setColor(Color.blue);
+				plot.changeFont(new Font("Helvetica", Font.PLAIN, 24));
+				plot.addLabel(0.15, 0.95, "JVP");
+				plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
+				plot.setColor(Color.blue);
+				pw=plot.show();
+			    }
+			
+			//manager.add(imp,myROI,mt);
+			//a.saveResults(ist,myROI);
+			xp[selInx]=(float)stime;
+			yp[selInx]=(float)area*(10000);//cm^2
+			plot.addPoints(xp, yp,PlotWindow.LINE);
+			plot.addPoints(xp, yp,PlotWindow.X);
+			
+			if((selInx<MAXSEL-1)&&stime<9.5)
+			    selInx++;
+			else
+			    {
+				fstr=true;
+				selInx=0;
+				xp = new float[MAXSEL]; 
+				yp = new float[MAXSEL];
+			    }
+		    }else
+		    {
+			//plot= new Plot("JVP","Time (s)","Units");
 			selInx=0;
-			xp = new float[MAXSEL]; 
-			yp = new float[MAXSEL];
+			fstr=true;
+			
 		    }
-	    }else
-	    {
-		//plot= new Plot("JVP","Time (s)","Units");
-		selInx=0;
-		fstr=true;
-		 
+		
+		//plotOverImage(ixp, iyp);
+		
+		//manager.select(0);
+		IJ.wait((int)fps);
+		li++;
 	    }
-	
-	//plotOverImage(ixp, iyp);
-	
-	//manager.select(0);
-	IJ.wait((int)fps);
-	li++;
     }
     }
     
@@ -761,6 +782,56 @@ public void mousePressed(MouseEvent e) {
 	return mdelay;
     }
 
+
+boolean showSettingsDialog(ImagePlus imp)
+    {
+	GenericDialog gd2 = new GenericDialog("Set parameters");
+	gd2.addStringField("Repository",repository);
+	gd2.addStringField("Patient ID",PID);
+	gd2.addNumericField("Pixel per cm", pixelXcm, 0);
+	gd2.addNumericField("J (1, or 3)", Jpos, 0);
+	gd2.addNumericField("Acquisition number", videon, 0);
+	gd2.addStringField("L/R",LoR);
+
+	gd2.showDialog();
+	if (gd2.wasCanceled())
+	    {
+		return false;
+	    }
+	repository=gd2.getNextString();
+	PID=gd2.getNextString();
+	pixelXcm=(int)gd2.getNextNumber();
+	Jpos=(int)gd2.getNextNumber();
+	videon=(int)gd2.getNextNumber();
+	LoR=gd2.getNextString();
+	return true;
+	
+    }
+    
+    boolean showUploadDialog(ImagePlus imp)
+    {
+	GenericDialog gd2 = new GenericDialog("Upload confirm");
+	gd2.addStringField("Repository",repository);
+	gd2.addStringField("Patient ID",PID);
+	gd2.addNumericField("Pixel per cm", pixelXcm, 0);
+	gd2.addNumericField("J (1, or 3)", Jpos, 0);
+	gd2.addNumericField("Acquisition number", videon, 0);
+	gd2.addStringField("L/R",LoR);
+	
+	gd2.showDialog();
+	if (gd2.wasCanceled())
+	    {
+		return false;
+	    }
+	repository=gd2.getNextString();
+	PID=gd2.getNextString();
+	pixelXcm=(int)gd2.getNextNumber();
+	Jpos=(int)gd2.getNextNumber();
+	videon=(int)gd2.getNextNumber();
+	LoR=gd2.getNextString();
+	return true;
+	
+    }
     
     boolean showDialog(ImagePlus imp) {
 	
@@ -769,16 +840,15 @@ public void mousePressed(MouseEvent e) {
 	if (cal.pixelWidth==0.0)
 	    cal.pixelWidth = 1.0;
 	double outputSpacing = cal.pixelDepth;
-	GenericDialog gd2 = new GenericDialog("Radial Reslice");
+	GenericDialog gd2 = new GenericDialog("JVP Ready!");
 	
 	gd2.addCheckbox("Acquisizione in Real-Time", true);
-	gd2.addNumericField("Pixel per cm", 130, 0);
 	gd2.addNumericField("Soglia GL", 30, 0);
 	gd2.addNumericField("Soglia gradiente GL", 0, 0);
 	gd2.addNumericField("Incremento angolare in gradi (iag)", 1, 0);
 	gd2.addNumericField("Finestra per il filtro mediano (espressa in iag)",10,0);
 	gd2.addNumericField("Dl+",90,2);
-	gd2.addStringField("Patient ID",PID);
+	
 	
 	
 	gd2.showDialog();
@@ -787,7 +857,7 @@ public void mousePressed(MouseEvent e) {
 	
 	if (cal.pixelDepth==0.0) cal.pixelDepth = 1.0;
 	isRealTime=gd2.getNextBoolean();
-	pixelXcm=gd2.getNextNumber();
+	
 	
 	tho=new Double(gd2.getNextNumber()).intValue();
 	if(tho==0) useGL=false;
@@ -797,7 +867,7 @@ public void mousePressed(MouseEvent e) {
 	mediaRange=(int)gd2.getNextNumber();
 	outerOscillationLimit=(double)gd2.getNextNumber();
 	myang=new double[nprofiles];
-	PID=gd2.getNextString();
+	
 	return true;
     }
     
