@@ -13,9 +13,13 @@
 - - [ ] Implements controller action
 - - [ ] orphan-data reconciliation
 - - [ ] Create header for orphan-data with no reconcicliation DICOM Study
+- - - [ ] Add 
 - [ ] OnLine CSA measurements
 - - [x] KeyPress event detection
 - - [x] JVP dataset recording
 - - [x] HTTP data transmission
-- - [X] Selection Patient ID o Study ID for reconciliation
 - - [ ] User confirm Upload. User complete upload form.
+- - - [X] add selection for Patient ID o Study ID (for reconciliation)
+- - - [ ] add  Left/Right
+- - - [ ] add  j123 position
+- - - [ ] add  pixel/cm (remove from initial dialog)
