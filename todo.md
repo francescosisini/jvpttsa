@@ -12,8 +12,10 @@
 - [ ] POST jvp orphan-data from imageJ
 - - [ ] Implements controller action
 - - [ ] orphan-data reconciliation
+- - [ ] Create header for orphan-data with no reconcicliation DICOM Study
 - [ ] OnLine CSA measurements
 - - [x] KeyPress event detection
 - - [x] JVP dataset recording
 - - [x] HTTP data transmission
 - - [X] Selection Patient ID o Study ID for reconciliation
+- - [ ] User confirm Upload. User complete upload form.
