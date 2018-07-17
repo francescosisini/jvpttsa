@@ -19,7 +19,7 @@
 - - [x] JVP dataset recording
 - - [x] HTTP data transmission
 - - [ ] User confirm Upload. User complete upload form.
-- - - [X] add selection for Patient ID o Study ID (for reconciliation)
-- - - [ ] add  Left/Right
-- - - [ ] add  j123 position
-- - - [ ] add  pixel/cm (remove from initial dialog)
+- - - [x] add selection for Patient ID o Study ID (for reconciliation)
+- - - [x] add  Left/Right
+- - - [x] add  j123 position
+- - - [x] add  pixel/cm (remove from initial dialog)
