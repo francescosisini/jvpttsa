@@ -30,7 +30,7 @@ import ij.measure.ResultsTable;
 
 public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,MouseListener{
 
-   
+    String HOST="http://localhost/jvp";
     String repository="unifeweb";
     boolean paused=false;
     int Jpos=2;
@@ -190,7 +190,7 @@ public void mousePressed(MouseEvent e) {
 		try{
 		    String PID2=URLEncoder.encode(PID, "UTF-8");
 		    
-		    String urlString = "http://localhost/jvp/controller.php?action=imagej";
+		    String urlString = HOST+"/controller.php?action=imagej";
 		    urlString=urlString+"&repository="+repository+"&videon="+videon+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax=";
 		    //Add jvp data
 		    String datax="";
@@ -811,6 +811,7 @@ boolean showSettingsDialog(ImagePlus imp)
     boolean showUploadDialog(ImagePlus imp)
     {
 	GenericDialog gd2 = new GenericDialog("Upload confirm");
+        gd2.addStringField("Remote host",HOST);
 	gd2.addStringField("Repository",repository);
 	gd2.addStringField("Patient ID",PID);
 	gd2.addNumericField("Pixel per cm", pixelXcm, 0);
@@ -823,6 +824,7 @@ boolean showSettingsDialog(ImagePlus imp)
 	    {
 		return false;
 	    }
+        HOST=gd2.getNextString();
 	repository=gd2.getNextString();
 	PID=gd2.getNextString();
 	pixelXcm=(int)gd2.getNextNumber();

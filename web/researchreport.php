@@ -27,54 +27,41 @@ $cbf=$infl["cbf"];
 <html>
 <head>
 
-
-
-<script>
-function myFunction(el) {
-    var x = document.getElementById(el);
-    if (x.style.display === 'none') {
-        x.style.display = 'block';
-    } else {
-        x.style.display = 'none';
-    }
-}
-</script>
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/it_IT/sdk.js#xfbml=1&version=v2.9&appId=763896243781229";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
 <title>JVP and Flow Study</title>
 </head>
 <body style="width:800px">
+    
 <div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:600px"><a href="#" onclick="history.go(-1);">back</a></div>
-<br><br><br><br>
-<div style="text-align: center">
-<table align=center>
-<tr>
-<th>SOGGETTO</th><th>DATA DI NASCITA</th><th>DATA ESAME</th><th>RECAPITO TELEFONICO</th>
-</tr>
-<tr>
-<?php
-//echo "<td>$rows[0]['nomev']</td><td>$rows[0]['cognome']</td><td>$rows[0]['indirizzo']</td><td>$rows[0]['telefono']</td>";
-?>
-</tr>
+
+<h1 style="text-align: center; font-size:16px; font-family: Times New Roman, Georgia, Serif;">ANALISI ULTRASONORA NON INVASIVA DEL RITORNO VENOSO CEREBRALE E DEL POLSO GIUGULARE</h1>
+
+
+<table align=left>
+    <tr>
+        <th>Nome e cognome</th><td><?php print($rows[0]['nome']);?></td>
+    </tr>
+    <tr>
+        <th>Sesso</th><td></td>
+    </tr>
+    <tr>
+        <th>Data e luogo di nascita</th><td></td>
+    </tr>
+    <tr>
+        <th>Codice Fiscale</th><td></td>
+    </tr>
+    <tr>
+        <th>Indirizzo di residenza</th><td></td>
+    </tr>
 </table>
-</div>
 
 
-<h1 style="text-align: center; font-size:16px; font-family: "Times New Roman", Georgia, Serif;">ANALISI ULTRASONORA NON INVASIVA DEL RITORNO VENOSO CEREBRALE E DEL POLSO GIUGULARE</h1>
+
 
 <p>
-<?php
-if($isCCSVIreport>0)
-{
-?>
+    <?php
+    if($isCCSVIreport>0)
+    {
+    ?>
 <a href='#' class='close_notification' title='Click to open'>CCSVI criteria<img src="img/close.png" width="20"  alt="Close" onClick="myFunction('ccsvi')" /></a>
 <div id='ccsvi' style="display:none;">
 <b>Storia: </b> <?php print($rows[0]['storia']); ?>

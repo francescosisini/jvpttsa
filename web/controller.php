@@ -20,12 +20,22 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require_once 'db.php';
 $a= $_GET['action'];
+
+if($a=='updatename'){
+       $db = new Db();
+       $name=$_GET['name'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `patientName`='$name' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+
 if($a=='imagej'){
-//=urlString+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax="; 
+    //=urlString+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax="; 
     $db = new Db();
-	$dx=$_GET['datax'];
-	$dy=$_GET['datay'];
-	$pid=$_GET['PID'];
+    $dx=$_GET['datax'];
+    $dy=$_GET['datay'];
+    $pid=$_GET['PID'];
     $videon=$_GET['videon'];
     $jpos=$_GET['jpos']; // J 1, 2 e 3
     $lor=$_GET['lor']; //Left Rigt
@@ -497,17 +507,19 @@ if($a=='savereport'){
 
 function saverReport()
 {
-	//bool array_key_exists ( mixed $key , array $array )
-	$db = new Db(); 
-	//Eliminare il report esistente (se presente) con chiave esterna StudyInstanceUID
-	$suid= $db -> quote($_GET['study']);
-	$query="DELETE FROM us_report WHERE StudyInstanceUID=".$suid;
+    //bool array_key_exists ( mixed $key , array $array )
+    $db = new Db(); 
+    //Eliminare il report esistente (se presente) con chiave esterna StudyInstanceUID
+    $suid= $db -> quote($_GET['study']);
+    
+    $query="DELETE FROM us_report WHERE StudyInstanceUID=".$suid;
 	$isok=$db -> query($query);//Come verifico se questa query è stata eseguita?
 	if(!$isok) die(" <b>Error saving data. Click to come back <b><a href=controller.php?action=start>Home</a>");
 	//Caricare i dati
 	$storia=$db ->quote($_GET['storia']);
-	$quesito=$db ->quote($_GET['quesito']);
-	$cca_csa_d=$_GET['cca_csa_d'];
+    $quesito=$db ->quote($_GET['quesito']);
+    $name=$db ->quote($_GET['name']);
+    $cca_csa_d=$_GET['cca_csa_d'];
 	$ica_csa_d=$_GET['ica_csa_d'];
 	$eca_csa_d=$_GET['eca_csa_d'];
 	$av_csa_d=$_GET['av_csa_d'];
@@ -561,12 +573,12 @@ function saverReport()
 	$j3_valvolaIpoMobile_s=isPresent(X_GET('j3_valvolaIpoMobile_s'));
 	$j3_compressioni_s=isPresent(X_GET('j3_compressioni_s'));
 	
-	$query="INSERT INTO `us_report`( `studyInstanceUID`, `storia`, `quesito`, `cca_csa_d`, `ica_csa_d`, `eca_csa_d`,";
+	$query="INSERT INTO `us_report`( `studyInstanceUID`, `nome`,`storia`, `quesito`, `cca_csa_d`, `ica_csa_d`, `eca_csa_d`,";
  	$query.="`av_csa_d`, `cca_v_d`, `ica_v_d`, `eca_v_d`, `av_v_d`, `j1_csa_d`, `j2_csa_d`, `j3_csa_d`, `j1_v_d`, `j2_v_d`, `j3_v_d`,"; 
 
 	$query.="`j1_bloccoFlusso_d`, `j1_flussoBi_d`, `j1_valvolaIpoMobile_d`, `j1_compressioni_d`, `j2_bloccoFlusso_d`, `j2_flussoBi_d`, `j2_valvolaIpoMobile_d`, `j2_compressioni_d`, `j3_bloccoFlusso_d`, `j3_flussoBi_d`, `j3_valvolaIpoMobile_d`, `j3_compressioni_d`, `cca_csa_s`, `ica_csa_s`, `eca_csa_s`, `av_csa_s`, `cca_v_s`, `ica_v_s`, `eca_v_s`, `av_v_s`, `j1_csa_s`, `j2_csa_s`, `j3_csa_s`, `j1_v_s`, `j2_v_s`, `j3_v_s`, `j1_bloccoFlusso_s`, `j1_flussoBi_s`, `j1_valvolaIpoMobile_s`, `j1_compressioni_s`, `j2_bloccoFlusso_s`, `j2_flussoBi_s`, `j2_valvolaIpoMobile_s`, `j2_compressioni_s`, `j3_bloccoFlusso_s`, `j3_flussoBi_s`, `j3_valvolaIpoMobile_s`, `j3_compressioni_s`) VALUES (";
 
-	$query.=$suid.",".$storia.",".$quesito.",".$cca_csa_d.",".$ica_csa_d.",".$eca_csa_d.",".$av_csa_d.",";
+	$query.=$suid.",".$name.",".$storia.",".$quesito.",".$cca_csa_d.",".$ica_csa_d.",".$eca_csa_d.",".$av_csa_d.",";
 
 	$query.=$cca_v_d.",".$ica_v_d.",".$eca_v_d.",".$av_v_d.",".$j1_csa_d.",".$j2_csa_d.",".$j3_csa_d.",".$j1_v_d.",".$j2_v_d.",";$query.=$j3_v_d.",".$j1_bloccoFlusso_d.",".$j1_flussoBi_d.",".$j1_valvolaIpoMobile_d.",".$j1_compressioni_d.","; 
 	$query.=$j2_bloccoFlusso_d.",".$j2_flussoBi_d.",".$j2_valvolaIpoMobile_d.",".$j2_compressioni_d.",".$j3_bloccoFlusso_d.",";
