@@ -28,12 +28,12 @@
         <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=uploadFile'>Upload</a> </div>
             -->
         
-        <input class=button type="button" onclick="location.href='controller.php?action=listsproject';" value="Insert" /></li>
+        <input class=button type="button" onclick="location.href='controller.php?action=listsproject';" value="Load" /></li>
         <!--
         <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listsproject'>Insert</a></div>
             -->
       
-      <input class=button type="button" onclick="location.href='controller.php?action=listAllstudies&project=all';" value="Data" /></li>
+      <input class=button type="button" onclick="location.href='controller.php?action=listAllstudies&project=all';" value="Studies" /></li>
       <!--
       <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllstudies&project=all'>Data</a></div>
           -->

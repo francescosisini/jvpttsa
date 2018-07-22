@@ -33,6 +33,13 @@
     font-size: 28px;
     margin: 4px 2px;
     cursor: pointer;
+ }
+  a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
 }
 </style>
 </head>
@@ -43,26 +50,31 @@
         </div>
        
        <h1 style="text-align: center; font-size:24px; font-family: Times New Roman, Georgia, Serif;font-color:blue;">Upload real time and off-line CSA dataset to produce JVP diagram</h1> 
-            
+<br><br>
+       <div style="width:100%;text-align:center;">
+           <img src="img/map.jpg">
+           
+       </div>
+       <br><br>
        <div style="text-align:center;">
            <form method="get" action="start.php">
                <button class=button type="submit">Start</button></div>
            </form>
-        <!--
-       <div id="gnu-banner">
-           <a href="https://www.gnu.org/">
-               <img src="img/gnu.png" size=30% alt=" [A GNU head] " />
-               <strong>GNU software</strong>
-           </a>
-       </div>
-       -->
-        
-            
-            <br><br><br><br><br><br><br><br><br><br><br><br>
-        <div  style="font-size:10px;font-family:verdana;">
-            Designed and Developed by <a href="https://github.com/francescosisini">Francesco Sisini@Tekamed srl</a><br>
-            
-        </div>
+           
+           <!--
+                <div id="gnu-banner">
+                <a href="https://www.gnu.org/">
+                <img src="img/gnu.png" size=30% alt=" [A GNU head] " />
+                <strong>GNU software</strong>
+                </a>
+                </div>
+           -->
+                      
+           <br><br><br><br><br><br><br><br><br><br><br><br>
+           <div  style="font-size:10px;font-family:verdana;">
+               Designed and Developed by <a href="https://github.com/francescosisini">Francesco Sisini@Tekamed srl</a><br>
+               
+           </div>
         </div><!-- /gnu-banner -->
         
         
