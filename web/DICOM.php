@@ -28,12 +28,9 @@ $file = (isset($path) ? $path : '');
 $isOK=true; //Posto a false se si trova un parametro DICOM non gestibile 
 ?>
 <html>
-
- <div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href='browse.php?<?php echo $mc;?>'>Back</a></div>
-<br><br>
-
-<br>
-Cathegory: <b><?php echo $project; ?> </b>
+<body>
+<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
+<h2>Repository: <b><?php echo $project; ?></h2>
 <?php
 
 if(!file_exists($fname.".jpg")) {
@@ -101,7 +98,7 @@ if($mod=='bmode')
 
 <table valign=top cellspacing=20>
 <tr>
-<td valign=top >DICOM preview<br><img width=300 src='<?php echo "$fname".".jpg";?>'></td><td valign=top >
+<td valign=top >DICOM preview<br><hr><br><img width=300 src='<?php echo "$fname".".jpg";?>'></td><td valign=top >
 
 <Table>
 <tr>

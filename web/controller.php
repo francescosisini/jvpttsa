@@ -1,29 +1,114 @@
-<!--
-Questo software è composto da una web application in PHP su MySQL. Lo scopo 
-è quello di amministtrare i dati raccolti durante le indgini diagnostiche del 
-Centro di Malattie Vascolari dell'università di Ferrara.
+/*
+<!-- Questo software e' composto da una web application in PHP su MySQL. Lo scopo 
+    e' quello di amministtrare i dati raccolti durante le indgini diagnostiche del 
+    Centro di Malattie Vascolari dell'università di Ferrara.
     Copyright (C) <2017>  <Francesco Sisini>
-
-    This program is free software: you can redistribute it and/or modify
+This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     (at your option) any later version.
+         This program is distributed in the hope that it will be useful,
+         but WITHOUT ANY WARRANTY; without even the implied warranty of
+             MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+             GNU General Public License for more details.
+                 You should have received a copy of the GNU General Public License
+                 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-
+*/
 <?php 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require_once 'db.php';
-//echo $_GET['action']; 
 $a= $_GET['action'];
+
+if($a=='updatename'){
+       $db = new Db();
+       $name=$_GET['name'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `patientName`='$name' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+if($a=='updatesex'){
+       $db = new Db();
+       $sex=$_GET['sex'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `sex`='$sex' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+if($a=='updateadd'){
+       $db = new Db();
+       $add=$_GET['add'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `address`='$add' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+if($a=='updatecf'){
+       $db = new Db();
+       $cf=$_GET['cf'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `primarycode`='$cf' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+
+
+if($a=='imagej'){
+    //=urlString+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax="; 
+    $db = new Db();
+    $dx=$_GET['datax'];
+    $dy=$_GET['datay'];
+    $pid=$_GET['PID'];
+    $videon=$_GET['videon'];
+    $jpos=$_GET['jpos']; // J 1, 2 e 3
+    $lor=$_GET['lor']; //Left Rigt
+    $repo=$_GET['repository']; //Left Rigt
+    $x=explode(";",$dx);
+    $y=explode(";",$dy);
+    print ("Loaded ".$pid);
+    
+/*Se lo studio non è già presente  lo inserisce */
+    $sql="SELECT * FROM `us_study` WHERE StudyInstanceUID='$pid'";
+    $rs=$db->select($sql);
+    $rn=count($rs,COUNT_NORMAL);
+    if($rn==0){
+        //Inserisce lo studio prima del video
+        $query="INSERT INTO `us_study`(`studyInstanceUID`, `patientName`, `patientFamilyName`, `patientID`,";
+        $query=$query." `studyDateTime`,`dataEntryDateTime`, `researchID`) VALUES ";
+        $query=$query."('$pid','','','$pid',now(),now(),'$repo')";
+        $db -> query($query);
+        print($query);	
+    }
+/*Inserisce il video*/
+    $query="Select * from us_videoclip where instanceNumber=$videon and studyInstanceUID='$pid'";
+    $rs=$db->select($query);
+    $rn=count($rs,COUNT_NORMAL);
+    if($rn==0)
+		{
+			$query="INSERT INTO `us_videoclip`( `instanceNumber`, `studyInstanceUID`, `dataOraVideo`, `dataEntryDateTime`,";
+			$query=$query." `RightOrLeftIJV`, `Jposition123`, `phdx`, `umx`, `phsx`, `umy`, `effectiveDuration`, `numberOfFrames`,";
+			$query=$query." `fileName`) VALUES ($videon,'$pid',now(),now(),'$lor',$jpos,1,1,1,1,1,1,1)";
+            print($query);
+		}
+    $db -> query($query);
+    $vid=$db->lastid();
+    
+    
+/* inserisce i dati*/
+    $eln=count ($x);
+    for($i=0;$i<$eln;$i++)
+		{
+            $query="INSERT INTO `sonogram`( `videoclipID`, `number`, `CSA`,`processID`,`perimeter`) VALUES";
+            $query=$query."('$vid',$x[$i],$y[$i],1,$y[$i])";
+            $db->query($query);
+            echo $query;
+        }
+	//$query="delete from `sonogram` where videoclipid=".$video;
+	//$db->query($query);
+	//Redirect("loadStudy.php?study=$SUID");
+}
 
 if($a=='deleteSonogram'){
 	$db = new Db();
@@ -242,10 +327,12 @@ if($a=='browse'){
 	$project=$_GET['project'];
 	$mod=$_GET['mod'];
 	if(!is_dir($path)){
-		Redirect("DICOM.php?path=$path&project=$project&mod=$mod");	
+		Redirect("DICOM.php?path=$path&project=$project&mod=$mod");
 	}
 	Redirect("browse.php?path=$path&project=$project&mod=$mod");
 }
+
+
 if($a=='addScreenshot'){
 	$suid=$_GET['study'];
 	$path=$_GET['path'];
@@ -432,6 +519,10 @@ if($a=='listsproject'){
 	Redirect("listProject.php");
 }
 
+if($a=='uploadFile'){
+	Redirect("./uploads/myupload.html");
+}
+
 if($a=='savereport'){
 	saverReport();
 	$study= $_GET['study'];
@@ -441,17 +532,19 @@ if($a=='savereport'){
 
 function saverReport()
 {
-	//bool array_key_exists ( mixed $key , array $array )
-	$db = new Db(); 
-	//Eliminare il report esistente (se presente) con chiave esterna StudyInstanceUID
-	$suid= $db -> quote($_GET['study']);
-	$query="DELETE FROM us_report WHERE StudyInstanceUID=".$suid;
+    //bool array_key_exists ( mixed $key , array $array )
+    $db = new Db(); 
+    //Eliminare il report esistente (se presente) con chiave esterna StudyInstanceUID
+    $suid= $db -> quote($_GET['study']);
+    
+    $query="DELETE FROM us_report WHERE StudyInstanceUID=".$suid;
 	$isok=$db -> query($query);//Come verifico se questa query è stata eseguita?
 	if(!$isok) die(" <b>Error saving data. Click to come back <b><a href=controller.php?action=start>Home</a>");
 	//Caricare i dati
 	$storia=$db ->quote($_GET['storia']);
-	$quesito=$db ->quote($_GET['quesito']);
-	$cca_csa_d=$_GET['cca_csa_d'];
+    $quesito=$db ->quote($_GET['quesito']);
+    $name=$db ->quote($_GET['name']);
+    $cca_csa_d=$_GET['cca_csa_d'];
 	$ica_csa_d=$_GET['ica_csa_d'];
 	$eca_csa_d=$_GET['eca_csa_d'];
 	$av_csa_d=$_GET['av_csa_d'];
@@ -505,12 +598,12 @@ function saverReport()
 	$j3_valvolaIpoMobile_s=isPresent(X_GET('j3_valvolaIpoMobile_s'));
 	$j3_compressioni_s=isPresent(X_GET('j3_compressioni_s'));
 	
-	$query="INSERT INTO `us_report`( `studyInstanceUID`, `storia`, `quesito`, `cca_csa_d`, `ica_csa_d`, `eca_csa_d`,";
+	$query="INSERT INTO `us_report`( `studyInstanceUID`, `nome`,`storia`, `quesito`, `cca_csa_d`, `ica_csa_d`, `eca_csa_d`,";
  	$query.="`av_csa_d`, `cca_v_d`, `ica_v_d`, `eca_v_d`, `av_v_d`, `j1_csa_d`, `j2_csa_d`, `j3_csa_d`, `j1_v_d`, `j2_v_d`, `j3_v_d`,"; 
 
 	$query.="`j1_bloccoFlusso_d`, `j1_flussoBi_d`, `j1_valvolaIpoMobile_d`, `j1_compressioni_d`, `j2_bloccoFlusso_d`, `j2_flussoBi_d`, `j2_valvolaIpoMobile_d`, `j2_compressioni_d`, `j3_bloccoFlusso_d`, `j3_flussoBi_d`, `j3_valvolaIpoMobile_d`, `j3_compressioni_d`, `cca_csa_s`, `ica_csa_s`, `eca_csa_s`, `av_csa_s`, `cca_v_s`, `ica_v_s`, `eca_v_s`, `av_v_s`, `j1_csa_s`, `j2_csa_s`, `j3_csa_s`, `j1_v_s`, `j2_v_s`, `j3_v_s`, `j1_bloccoFlusso_s`, `j1_flussoBi_s`, `j1_valvolaIpoMobile_s`, `j1_compressioni_s`, `j2_bloccoFlusso_s`, `j2_flussoBi_s`, `j2_valvolaIpoMobile_s`, `j2_compressioni_s`, `j3_bloccoFlusso_s`, `j3_flussoBi_s`, `j3_valvolaIpoMobile_s`, `j3_compressioni_s`) VALUES (";
 
-	$query.=$suid.",".$storia.",".$quesito.",".$cca_csa_d.",".$ica_csa_d.",".$eca_csa_d.",".$av_csa_d.",";
+	$query.=$suid.",".$name.",".$storia.",".$quesito.",".$cca_csa_d.",".$ica_csa_d.",".$eca_csa_d.",".$av_csa_d.",";
 
 	$query.=$cca_v_d.",".$ica_v_d.",".$eca_v_d.",".$av_v_d.",".$j1_csa_d.",".$j2_csa_d.",".$j3_csa_d.",".$j1_v_d.",".$j2_v_d.",";$query.=$j3_v_d.",".$j1_bloccoFlusso_d.",".$j1_flussoBi_d.",".$j1_valvolaIpoMobile_d.",".$j1_compressioni_d.","; 
 	$query.=$j2_bloccoFlusso_d.",".$j2_flussoBi_d.",".$j2_valvolaIpoMobile_d.",".$j2_compressioni_d.",".$j3_bloccoFlusso_d.",";

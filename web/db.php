@@ -46,6 +46,18 @@ ini_set('display_errors', 1);
 		return $result;
 	}
 
+    public function lastid() {
+		// Connect to the database
+		$connection = $this -> connect();
+
+		// Query the database
+		$id = $connection ->insert_id;
+		
+		return $id;
+	}
+
+
+    
 	/**
 	 * Fetch rows from the database (SELECT query)
 	 *

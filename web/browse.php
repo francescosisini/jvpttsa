@@ -13,10 +13,10 @@ $suid="";
 <!DOCTYPE html>
 <html>
 <body>
-<div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href='listProject.php'>Back</a></div>
+<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
 <br><br>
 
-<p>Cathegory: <?php echo $project; ?></p>
+<h2>Repository: <?php echo $project; ?></h2>
 <?php
 if($mod=='screenshot')
 {
@@ -31,10 +31,10 @@ for($i=0;$i<$rn;$i++)
 {
 	if(is_dir($path.'/'.$dirs[$i]))
 	{
-		echo "<img src='img/System-folder-icon.png' width=30px><a href='controller.php?action=$action&study=$suid&cvpid=$cvpid&mod=$mod&project=$project&path=$path/$dirs[$i]'>$dirs[$i]</a><br>";
+		echo "<img src='img/System-folder-icon.png' width=30px><a href='controller.php?action=$action&study=$suid&cvpid=$cvpid&mod=$mod&project=$project&path=$path/$dirs[$i]'>$dirs[$i]</a><br><hr><br>";
 	}else
 	{
-		echo "<img src='img/test.jpg' width=30px><a href='controller.php?action=$action&study=$suid&cvpid=$cvpid&mod=$mod&project=$project&path=$path/$dirs[$i]'>$dirs[$i]</a><br>";
+		echo "<img src='img/test.jpg' width=30px><a href='controller.php?action=$action&study=$suid&cvpid=$cvpid&mod=$mod&project=$project&path=$path/$dirs[$i]'>$dirs[$i]</a><br></a><br><hr><br>";
 	}
 }
 ?>
