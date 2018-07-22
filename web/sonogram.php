@@ -51,9 +51,8 @@ $plot->DrawGraph();
 </script>
 </head>
 <body>
+<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
 
-
-<div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"> <a href='controller.php?action=loadStudy&study=<?php echo $suid;?>'>Back</a></div>
 
 <h1>JVP Plot</h1>
 <p>Get data <a href=controller.php?action=getdata&mode=raw&video=<?php echo $_GET['video'];?>>raw</a>&nbsp;<a href=controller.php?action=getdata&mode=img&video=<?php echo $_GET['video'];?>>for ImageJ</a></p>

@@ -20,7 +20,8 @@ Centro di Malattie Vascolari dell'università di Ferrara.
 <!DOCTYPE html>
 <html>
 <body>
-<div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href="#" onclick="history.go(-1);">back</a></div>
+    
+<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
 
 
 <?php 
@@ -43,7 +44,8 @@ if($project!="all") $query=$query." where researchID='".$project."'";
 $rows = $db -> select($query);
 $rn = count($rows,COUNT_NORMAL);
 ?>
-<br><br><br>
+    <br><br><br>
+    <h2>Reports</h2>
 <hr>
 
 <Table cellspacing="1">
@@ -54,9 +56,9 @@ $rlc=true;
 for ($i=0; $i<$rn; $i++) {
 	if($rlc){
 		
-		$color="#99ccff";
+		$color="#bbbbbb";
 	}else{
-		$color="#ffff99";
+		$color="#dddddd";
 	}
 	$rlc=!$rlc;
 	echo "<tr bgcolor=$color ><td><a href='controller.php?action=researchreport&study=".$rows[$i]['studyInstanceUID']."'>Open</a></td><td>".$rows[$i]['studyDateTime']."</td><td>".$rows[$i]['patientID']."</td><td>".$rows[$i]['researchID']."</td></tr><hl>";

@@ -21,8 +21,8 @@ Centro di Malattie Vascolari dell'università di Ferrara.
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
 <body>
-
-<div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href='listProject.php'>Back</a></div>
+    
+<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
 
 <?php 
 error_reporting(E_ALL);
@@ -43,7 +43,7 @@ $project=$rowStudy[0]['researchID'];
 <td valign=top>
 <b>Study data:</b><br><br>
 <ul>
-<b><li>Cathegory</b> <?php echo $project;?></li><br>
+<b><li>Repository</b> <?php echo $project;?></li><br>
 <b><li>Study Instance UID</b> <?php echo $suid;?></li><br>
 <b><li>Patient ID</b> <?php echo $rowStudy[0]['patientID'];?></li><br>
 <b><li>Study Date</b> <?php echo $rowStudy[0]['studyDateTime'];?></li><br>
@@ -270,8 +270,10 @@ else
 	<td colspan=*><hr></td>
 </tr>
 <tr>
-<td>
-<a href='controller.php?action=loadreport&study=<?php echo $suid;?>'>Report</a> CCSVI criteria<br><br>
+    <td>
+        <!--
+        <a href='controller.php?action=loadreport&study=<?php echo $suid;?>'>Report</a> CCSVI criteria<br><br>
+        -->
 <!--<a href='controller.php?action=medicalreport&study=<?php echo $suid;?>'><b>Print</b> medical report</a><br><br>-->
 <a href='controller.php?action=researchreport&study=<?php echo $suid;?>'>Print</a> study report<br><br>
 </td>

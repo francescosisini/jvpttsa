@@ -29,6 +29,31 @@ if($a=='updatename'){
        $db -> query($query);
     
 }
+if($a=='updatesex'){
+       $db = new Db();
+       $sex=$_GET['sex'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `sex`='$sex' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+if($a=='updateadd'){
+       $db = new Db();
+       $add=$_GET['add'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `address`='$add' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+if($a=='updatecf'){
+       $db = new Db();
+       $cf=$_GET['cf'];
+       $sid=$_GET['sid'];
+       $query="update `us_study` set `primarycode`='$cf' where StudyInstanceUID='$sid'";
+       $db -> query($query);
+    
+}
+
 
 if($a=='imagej'){
     //=urlString+"&jpos="+Jpos+"&lor="+LoR+"&PID="+PID2+"&datax="; 

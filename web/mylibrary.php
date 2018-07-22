@@ -366,7 +366,8 @@ function getVideoId($suid,$rl,$jp){
 	$query="SELECT * from us_videoclip where RightOrLeftIJV='".$rl."' and Jposition123=".$jp." and  studyInstanceUID =".$db->quote($suid);
 	$rowStudy = $db -> select($query);
 	$rn = count($rowStudy,COUNT_NORMAL);
-	if($rn==0) die("Dati IJV $rl non presenti.");
+    if($rn==0)
+        return -1;
 	$vid= $rowStudy[0]['videoclipID'];
 	return $vid;
 }

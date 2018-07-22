@@ -15,7 +15,7 @@ $patientName=$rows[0]['patientName'];
 
 $s=$_GET['study'];
 $reported=true;
-$query="SELECT * from us_report inner join us_study on us_report.studyInstanceUID=us_report.studyInstanceUID where us_report.studyInstanceUID =".$suid;
+$query="SELECT * from us_report inner join us_study on us_study.studyInstanceUID=us_report.studyInstanceUID where us_report.studyInstanceUID =".$suid;
 $rows = $db -> select($query);
 $rn = count($rows,COUNT_NORMAL);
 /*
@@ -29,14 +29,16 @@ $rn = count($rows,COUNT_NORMAL);
 function chk($n,$s)
 {
     if($GLOBALS['rn']==0) return "unchecked";
-    if($rows[$n][$s]==1) return "checked";
+    if($GLOBALS["rows"][$n][$s]==1) return "checked";
     return "unchecked";
 }
 
 function mprint($n,$s)
 {
-    if($GLOBALS['rn']>0)
-        return($rows[$n][$s]);
+    echo "Porco";
+    
+    if($GLOBALS["rn"]>0)
+        return($GLOBALS["rows"][$n][$s]);
     else
         return("");
 }

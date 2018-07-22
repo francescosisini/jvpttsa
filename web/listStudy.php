@@ -20,7 +20,7 @@ Centro di Malattie Vascolari dell'università di Ferrara.
 <!DOCTYPE html>
 <html>
 <body>
- <div style="FLOAT:left;height:35px;width:200px;font-size:22;font-family:verdana;background-color:#ffffcc;"><a href='start.php'><img src=img/miniLogo.gif height=34></a></div><div style="FLOAT:left;height:35px;margin-top:0px;background-color:#ccd9ff;width:800px"><a href='listProject.php'>Back</a></div>
+ <div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='start.php' style="color:white;">Home</a>
 <br><br>
 
 <?php 
@@ -29,16 +29,18 @@ ini_set('display_errors', 1);
 include("db.php");
 $project=$_GET["project"];
 ?>
-Cathegory: <b><?php echo $project; ?> </b><br><br>
-<?php if($project!='all') echo "Load:<br>";?>
+Active repository: <b><?php echo $project; ?> </b><br><br>
+
+<?php if($project!='all') echo "<h2>Choose image modality:</h2>";?>
+<ul>
 <?php
 $db = new Db();    
 $config = parse_ini_file('./config.ini'); 
 $studydir=$config['study_dir'];
 if($project!='all'){
-	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=bmode'>B-mode videoclip</a> to produce CSA time diagram<br>";
-	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=doppler'>Doppler screenshot</a> to sample blood velocity trace<br>";
-	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=cvp'>B-mode for CVP</a> to insert CVP<br>";
+	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=bmode'>B-mode videoclip</a> <br>";
+	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=doppler'>Doppler screenshot</a><br>";
+	echo "<li><a href='controller.php?action=browse&project=$project&path=$studydir&mod=cvp'>B-mode for CVP</a><br>";
 }
 
 
@@ -49,9 +51,10 @@ if($project!="all") $query=$query." where researchID='".$project."'";
 $rows = $db -> select($query);
 $rn = count($rows,COUNT_NORMAL);
 ?>
+</ul>
 <br><br><br>
 <hr>
-Exixting studies for <?php echo $project; ?>:
+<h2>Existing studies for <?php echo $project; ?>:</h2>
 <Table cellspacing="10">
 <tr><th></th><th>Date</th><th>Patient ID</th></tr>
 <?php
