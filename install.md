@@ -5,5 +5,6 @@
   - sudo apt install mysql-server
 - PHP
   - sudo apt install php libapache2-mod-php php-mysql
-      - (sudo systemctl restart apache2)
-      - ()
+      - (sudo systemctl restart apache2) 
+- DCMTK
+  - sudo apt-get install dcmtk
