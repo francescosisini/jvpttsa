@@ -9,16 +9,16 @@
     post_max_size =	0
     in /etc/php/7.2/apache2/php.ini 
 - - [x]  needs uploaded notification
-- [ ] POST jvp orphan-data from imageJ
-- - [ ] Implements controller action
-- - [ ] orphan-data reconciliation
-- - [ ] Create header for orphan-data with no reconcicliation DICOM Study
+- [x] POST jvp orphan-data from imageJ
+- - [x] Implements controller action
+- - [x] orphan-data reconciliation
+- - [x] Create header for orphan-data with no reconcicliation DICOM Study
 - - - [ ] Add 
-- [ ] OnLine CSA measurements
+- [x] OnLine CSA measurements
 - - [x] KeyPress event detection
 - - [x] JVP dataset recording
 - - [x] HTTP data transmission
-- - [ ] User confirm Upload. User complete upload form.
+- - [x] User confirm Upload. User complete upload form.
 - - - [x] add selection for Patient ID o Study ID (for reconciliation)
 - - - [x] add  Left/Right
 - - - [x] add  j123 position
