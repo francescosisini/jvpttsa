@@ -8,3 +8,8 @@
       - (sudo systemctl restart apache2) 
 - DCMTK
   - sudo apt-get install dcmtk
+- phpMyAdmin
+  - sudo apt-get install phpmyadmin php-mbstring php-gettext
+  - CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'newuser'@'localhost';
+FLUSH PRIVILEGES;
