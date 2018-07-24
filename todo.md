@@ -25,5 +25,5 @@
 - - - [x] add  pixel/cm (remove from initial dialog)
 - - [x] Pause aquisition to make measurament on the image
 - - [x] Set acquisition parameter
-- - [ ] Set JVP and Plot windows in given location in the window
+- - [x] Set JVP and Plot windows in given location in the window
 - - [ ] Set the focus in JVP plot after the Plot is shown
