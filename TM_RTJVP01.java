@@ -30,6 +30,10 @@ import ij.measure.ResultsTable;
 
 public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,MouseListener{
 
+    int wjx,wjy,wjw,wjh;
+    int wpx,wpy,wpw,wph;
+    int wrx,wry,wrw,wrh;
+    
     String HOST="http://localhost/jvp";
     String repository="unifeweb";
     boolean paused=false;
@@ -105,15 +109,12 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,Mous
 public void mousePressed(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
-		int offscreenX = canvas.offScreenX(x);
-		int offscreenY = canvas.offScreenY(y);
-		showDialog(imp);
-		IJ.log("Mouse pressed: "+offscreenX+","+offscreenY+modifiers(e.getModifiers()));
-		//IJ.log("Right button: "+((e.getModifiers()&Event.META_MASK)!=0));
-	}
+                xrc=x;
+                yrc=y;
+                	}
 
 	public void mouseReleased(MouseEvent e) {
-		IJ.log("mouseReleased: ");
+		
 	}
 	
 	public void mouseDragged(MouseEvent e) {
@@ -247,13 +248,34 @@ public void mousePressed(MouseEvent e) {
 	
 	return DOES_ALL;
     }
+
+    void setWindosLocation()
+    {
+      
+        
+        
+        wjx=IJ.getInstance().getX();
+        wjy=IJ.getInstance().getY()+120;
+       
+        
+        wjw=500;
+        wjh=500;
+        wpx=wjx;
+        wpy=wjy+wjh+50;
+        wpw=wjw;
+        wph=200;
+        wrx=0;
+        wry=0;
+        wrw=wjw;
+        wrh=wjh;
+    }
     
     public void run(ImageProcessor ip) {
-
+        setWindosLocation();
 	ovl=new Overlay();
 	imp = WindowManager.getImage("JVP");
 	win = imp.getWindow();
-	
+	win.setLocationAndSize(wjx,wjy,wjw,wjh);
     	if(win==null)
 	    {
     		IJ.showMessage("Creare un'imagine vuota chiamata JVP");
@@ -263,7 +285,7 @@ public void mousePressed(MouseEvent e) {
     	imp.setOverlay(ovl);
 	canvas = win.getCanvas();
 	canvas.addKeyListener(this);
-	//canvas.addMouseListener(this);
+	canvas.addMouseListener(this);
 	/*
 	ImageWindow win = imp.getWindow();
 	
@@ -437,7 +459,7 @@ public void mousePressed(MouseEvent e) {
 		
 		mt++;
 		
-		Rectangle screenRect = new Rectangle(0,0,500,500);
+		Rectangle screenRect = new Rectangle(wrx,wry,wrw,wrh);
 		if(isRealTime&&!paused)
 		    {
 			try{
@@ -453,7 +475,7 @@ public void mousePressed(MouseEvent e) {
 				    canvas = win.getCanvas();
 				    canvas.addKeyListener(this);
 				    canvas.removeKeyListener(IJ.getInstance());
-				    //canvas.addMouseListener(this);
+				    canvas.addMouseListener(this);
 				}
 			}
 			catch(Exception ex)
@@ -553,6 +575,12 @@ public void mousePressed(MouseEvent e) {
 				plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
 				plot.setColor(Color.blue);
 				pw=plot.show();
+                                pw.setLocationAndSize(wpx,wpy,wpw,wph);
+                                imp.getWindow().setFocusable(true);
+                                
+                                //imp.getWindow().setRequestFocusEnabled(true);
+                                imp.getWindow().requestFocus();
+                                //imp.getWindow().Focus();
 			    }
 			
 			//manager.add(imp,myROI,mt);
@@ -561,7 +589,7 @@ public void mousePressed(MouseEvent e) {
 			yp[selInx]=(float)area*(10000);//cm^2
 			plot.addPoints(xp, yp,PlotWindow.LINE);
 			plot.addPoints(xp, yp,PlotWindow.X);
-			
+			imp.getWindow().requestFocus();
 			if((selInx<MAXSEL-1)&&stime<9.5)
 			    selInx++;
 			else
