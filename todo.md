@@ -26,4 +26,5 @@
 - - [x] Pause aquisition to make measurament on the image
 - - [x] Set acquisition parameter
 - - [x] Set JVP and Plot windows in given location in the window
-- - [ ] Set the focus in JVP plot after the Plot is shown
+- - [x] Set ROI center using mouse click
+- - [x] Set the focus in JVP plot after the Plot is shown
