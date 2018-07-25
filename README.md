@@ -11,7 +11,7 @@ An ultrasound jugular venous pulse tracing  task specific algorithm  communicati
 - [ImageJ] (https://github.com/imagej/imagej)
 ## Credits
 DICOM support from [deanvaughan.org](http://deanvaughan.org/wordpress/dicom-php-class/)
-[Login]: (http://www.phpcodify.com/angularjs-login-script-using-php-mysql-bootstrap/)
+Login system from [phpcodify](http://www.phpcodify.com/angularjs-login-script-using-php-mysql-bootstrap/)
 
 -------------------
 ![ ](logo.gif)
