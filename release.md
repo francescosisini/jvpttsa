@@ -8,7 +8,7 @@ Le funzionalità sono catalogate come: *riechiesta* se presente all'interno dell
 - [x] Il sistema è stato installato sul server [daa](http://daa.tekamed.it) accessibile in Internet (richiesta)
 - [x] Sistema PhP-MySql di Login (aggiunta)
 - [x] Upload study DICOM via HTTP/Post action (aggiunta) 
-- [x] Restying (aggiunta)
+- [x] Restyling html (aggiunta)
 
 - Seconda fase: integrazione del plugin US_RTJVP01
 - [x] Trasmissione dati  al repository web (richiesta)
@@ -27,6 +27,7 @@ Visti gli accordi:
 - trasformazione degli applicativi attualmente usati in un unico progetto software organico
 - installazione sulla rete intranet o internet del database esistente
 - integrazione della procedura on-line al detto database
+
 Tekamed ritiene di aver raggiiunto gli obiettivi concordati
 
 
