@@ -20,4 +20,17 @@ Le funzionalità sono catalogate come: *riechiesta* se presente all'interno dell
 - [x] Posizionamento della ROI di acquisizione con mouse-click (aggiunta)
 
 - Non modificato
--- Il codice e le strutture dati per l'inserimento e l'analisi dei tracciati ECG e JVP (cruenta) non sono stati modificati 
+Il codice e le strutture dati per l'inserimento e l'analisi dei tracciati ECG e JVP (cruenta) non sono stati modificati 
+
+## Risultato
+Visti gli accordi: 
+- trasformazione degli applicativi attualmente usati in un unico progetto software organico
+- installazione sulla rete intranet o internet del database esistente
+- integrazione della procedura on-line al detto database
+Tekamed ritiene di aver raggiiunto gli obiettivi concordati
+
+
+
+
+
+
