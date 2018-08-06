@@ -11,8 +11,6 @@ import ij.plugin.frame.RoiManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
-
-
 import ij.plugin.filter.*;
 import ij.measure.ResultsTable;
 
@@ -30,30 +28,42 @@ import ij.measure.ResultsTable;
 
 public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,MouseListener{
 
+    /* Coordinate finestra JVP e Plot */
     int wjx,wjy,wjw,wjh;
     int wpx,wpy,wpw,wph;
     int wrx,wry,wrw,wrh;
     
-    String HOST="http://localhost/jvp";
-    String repository="unifeweb";
+
+    /* stato applicativo*/
     boolean paused=false;
+    boolean fstr=true;
+    boolean kl=false;//Used to flak keylistner setted
+    boolean ecgrecording=false;
+    boolean record=false;
+    boolean exit=false;
+    
+    String HOST="http://daa.tekamed.it/jvp";
+    String repository="TEKAMED";
+    
     int Jpos=2;
     int videon=1;
     String LoR="";
-    boolean kl=false;//Used to flak keylistner setted
+    
     String PID="John Doe";
-    boolean fstr=true;
     float pdt=0;
-    private static final double rho = 1000;
-    private double outputZSpacing = 1.0;
-    private int nprofiles = 1;
+    static final double rho = 1000;
+    double outputZSpacing = 1.0;
+    int nprofiles = 1;
     int width=300;
-    private ImagePlus imp;
+    ImagePlus imp;
+    ImageProcessor ipr;
     Overlay ovl; 
     RoiManager manager;	
     ResultsTable rt=ResultsTable.getResultsTable();
-    private  double  xrc,yrc;
-    private double[] myang;
+    double  xrc,yrc;//coordinate del centro di scansione delle pareti giugulari
+    int  xecg=400,yecg=400;//coordinate dell'angolo superiore sinistro del rettangolo di ricerca del ECG
+    
+    double[] myang;
     
     int currentRoi=0;  
     private int mediaRange=10;
@@ -79,8 +89,9 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,Mous
     /*Set di coordinate per il plot del tracciato JVP*/
     int selInx=0;
     int MAXSEL=(int)(fps*t_scale_max);
-    float []xp;
-    float []yp;
+    float []xp; // La base dei tempi
+    float []yp; // La CSA
+    float []ep; // La traccia ECG
     int []ixp;
     int []iyp;
     int xLimiInf=0;
@@ -95,54 +106,84 @@ public class TM_RTJVP01 implements PlugInFilter , KeyListener,ImageListener,Mous
     private double ijv_length;
     private double compliance_xul;
     private double csa_x;
+
     
-    boolean record=false;
-    boolean exit=false;
     
     
     ImageWindow win;
     ImageCanvas canvas;
 
-   
-    
 
-public void mousePressed(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
+    public float getECGValue()
+    {
+        int[] vc=new int[3];
+        //int w=150;
+        //int h=150;
+        int h=wjh-yecg;
+        for (int y=yecg; y<wjh; y++) {
+            for (int x=xecg; x<wjw; x++) {
+                //ipr.getPixel (wjw-x,wjh-h+y,vc);
+                ipr.getPixel (x,y,vc);
+                if(vc[0]>1.4*vc[1] && vc[0]>vc[2]*1.4 && vc[0]>150)
+                    {
+                        //IJ.log("ECG "+y);
+                        return (wjh-y)/(float)h*(float)3.;
+                    }
+            }
+        }
+        IJ.log("R:"+vc[0]+" G:"+vc[1]+" B:"+vc[2]);
+        return -1;
+        
+    }
+    
+    
+    
+    public void mousePressed(MouseEvent e) {
+        
+        int x = e.getX();
+        int y = e.getY();
+        if(ecgrecording)
+            {
+                xecg=x;
+                yecg=y;
+            }
+        else
+            {
                 xrc=x;
                 yrc=y;
-                	}
-
-	public void mouseReleased(MouseEvent e) {
-		
-	}
-	
-	public void mouseDragged(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
-		int offscreenX = canvas.offScreenX(x);
-		int offscreenY = canvas.offScreenY(y);
-		IJ.log("Mouse dragged: "+offscreenX+","+offscreenY+modifiers(e.getModifiers()));
-	}
-
-	public static String modifiers(int flags) {
-		String s = " [ ";
-		if (flags == 0) return "";
-		if ((flags & Event.SHIFT_MASK) != 0) s += "Shift ";
-		if ((flags & Event.CTRL_MASK) != 0) s += "Control ";
-		if ((flags & Event.META_MASK) != 0) s += "Meta (right button) ";
-		if ((flags & Event.ALT_MASK) != 0) s += "Alt ";
-		s += "]";
-		if (s.equals(" [ ]"))
- 			s = " [no modifiers]";
-		return s;
-	}
-
-	public void mouseExited(MouseEvent e) {}
-	public void mouseClicked(MouseEvent e) {}	
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseMoved(MouseEvent e) {}
-
+            }
+    }
+    
+    public void mouseReleased(MouseEvent e) {
+        
+    }
+    
+    public void mouseDragged(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        int offscreenX = canvas.offScreenX(x);
+        int offscreenY = canvas.offScreenY(y);
+        IJ.log("Mouse dragged: "+offscreenX+","+offscreenY+modifiers(e.getModifiers()));
+    }
+    
+    public static String modifiers(int flags) {
+        String s = " [ ";
+        if (flags == 0) return "";
+        if ((flags & Event.SHIFT_MASK) != 0) s += "Shift ";
+        if ((flags & Event.CTRL_MASK) != 0) s += "Control ";
+        if ((flags & Event.META_MASK) != 0) s += "Meta (right button) ";
+        if ((flags & Event.ALT_MASK) != 0) s += "Alt ";
+        s += "]";
+        if (s.equals(" [ ]"))
+            s = " [no modifiers]";
+        return s;
+    }
+    
+    public void mouseExited(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {}	
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseMoved(MouseEvent e) {}
+    
     
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
@@ -153,6 +194,12 @@ public void mousePressed(MouseEvent e) {
          * Uscita
          */
         if(keyCode==27) exit=true;
+
+        /*
+         * ECG on/off
+         */
+        if(keyCode==69)ecgrecording=!ecgrecording;//E
+
         
         /*
          * Record on/off
@@ -196,47 +243,47 @@ public void mousePressed(MouseEvent e) {
 		    //Add jvp data
 		    String datax="";
 		    String datay="";
+                    String datae="";
 		    for(int i=0;i<MAXSEL-1;i++)
 			{			
-			    datax=datax+xp[i]+";";
-			    datay=datay+yp[i]+";";
-			}
-			URL url = new URL(urlString+datax+"&datay="+datay);
-			IJ.log(String.valueOf(url.toString()));
-			URLConnection conn = url.openConnection();
-			InputStream is = conn.getInputStream();
-			int i;
-			char c;
-			String st="";
-			while((i = is.read())!=-1) {
-			    c = (char)i;
-			    st=st+c;
-			    // prints character
-			    
-			}
-			IJ.log(st);
+                            if(xp[i]>0)
+                                {
+                                    datax=datax+xp[i]+";";
+                                    datay=datay+yp[i]+";";
+                                    datae=datae+ep[i]+";";
+                                }
+                        }
+                    if(ecgrecording)
+                        {
+                            urlString=urlString+datax+"&datay="+datay+"&ecg=1&datae="+datae;
+                        }else
+                        {
+                            urlString=urlString+datax+"&datay="+datay+"&ecg=0";
+                        }
+                    URL url = new URL(urlString);
+                    IJ.log(String.valueOf(url.toString()));
+                    URLConnection conn = url.openConnection();
+                    InputStream is = conn.getInputStream();
+                    int i;
+                    char c;
+                    String st="";
+                    while((i = is.read())!=-1) {
+                        c = (char)i;
+                        st=st+c;
+                        // prints character
 			
+                    }
+                    IJ.log(st);
+                    
 		}catch(Exception ex)
-		{
+                    {
 			IJ.log(ex.toString());
-		}	
+                    }	
 	}	
-	
-
-
-        //IJ.log("keyPressed: keyCode=" + keyCode + " (" + KeyEvent.getKeyText(keyCode) + ")");
-        //IJ.log("Parameter xrc="+xrc+"; yrc="+yrc+"; GL="+tho+"; R="+outerOscillationLimit);
-        
-        
-	//IJ.getInstance().keyPressed(e); // hand off event to ImageJ
     }
     public void imageClosed(ImagePlus imp) {
-       /* if (win!=null)
-            win.removeKeyListener(this);
-        if (canvas!=null)
-            canvas.removeKeyListener(this);
-        ImagePlus.removeImageListener(this);
-        IJ.log("removeKeyListener");*/
+        
+
     }
 
     public void keyReleased(KeyEvent e) {}
@@ -258,12 +305,12 @@ public void mousePressed(MouseEvent e) {
         wjy=IJ.getInstance().getY()+120;
        
         
-        wjw=500;
+        wjw=580;
         wjh=500;
         wpx=wjx;
         wpy=wjy+wjh+50;
         wpw=wjw;
-        wph=200;
+        wph=250;
         wrx=0;
         wry=0;
         wrw=wjw;
@@ -271,6 +318,7 @@ public void mousePressed(MouseEvent e) {
     }
     
     public void run(ImageProcessor ip) {
+        ipr=ip;
         setWindosLocation();
 	ovl=new Overlay();
 	imp = WindowManager.getImage("JVP");
@@ -286,38 +334,7 @@ public void mousePressed(MouseEvent e) {
 	canvas = win.getCanvas();
 	canvas.addKeyListener(this);
 	canvas.addMouseListener(this);
-	/*
-	ImageWindow win = imp.getWindow();
-	
-	win.addKeyListener(this);
-	
-	ImagePlus.addImageListener(this);
-	
-	
-	
-	*/
-	//canvas.addMouseMotionListener(this);
-    	
-        
-	
-        
-         
-         
-    	
-	
-  
-	Roi[] ra;
-	manager = RoiManager.getInstance(); 
-	if(manager==null)
-	{
-	    //IJ.showMessage("Aprire il ROIManager dal menu Analze->Tool");
-	    //return;
-	}else
-	    {
-		ra=manager.getRoisAsArray();
-	    }
-		
-	
+	    		
 	int stackSize = mstackSize;
 	Roi roi = imp.getRoi();
 	int roiType = roi!=null?roi.getType():0;
@@ -337,47 +354,45 @@ public void mousePressed(MouseEvent e) {
 	ecg_cicle=new double[(int)fps];
 	t_jvp_cicle=new double[(int)fps];
 	t_ecg_cicle=new double[(int)fps];
-
 	
 	/*
 	 * PLOT
 	 */
-	
-	xp = new float[MAXSEL]; 
-	yp = new float[MAXSEL]; 
+        xp = new float[MAXSEL]; 
+	yp = new float[MAXSEL];
+        ep = new float[MAXSEL]; 
 	ixp = new int[stackSize]; 
 	iyp = new int[stackSize]; 
 	
 	
 	PlotWindow.noGridLines = false; // draw grid lines
 	
-       
-       long startTime = System.currentTimeMillis();	
-       currentRoi=0;
-       initialize();
-       
-       
-       
-       /**
-	  Cross correlation between signal acquired in two differet frames 
-       */
-       
-       
-       int z=nprofiles;
-       
-       /**
-	  STEP 1 crea l'array dei ritardi
-       */
-       detectJugularWall(z);
-       rt.show("Results");
-       plot.show();
-       
-       
+        
+        long startTime = System.currentTimeMillis();	
+        currentRoi=0;
+        initialize();
+        
+        
+        
+        /**
+           Cross correlation between signal acquired in two differet frames 
+        */
+        
+        
+        int z=nprofiles;
+        
+        /**
+           STEP 1 crea l'array dei ritardi
+        */
+        detectJugularWall(z);
+        
+        
+        
        /**
 	  STEP 3 ricalcola la ROI sui ritardi
        */
        
-       IJ.showStatus(IJ.d2s(((System.currentTimeMillis()-startTime)/1000.0),2)+" seconds");
+       //IJ.showStatus(IJ.d2s(((System.currentTimeMillis()-startTime)/1000.0),2)+" seconds");
        
     }
     
@@ -466,6 +481,7 @@ public void mousePressed(MouseEvent e) {
 			    BufferedImage capture = new Robot().createScreenCapture(screenRect);
 			    imp.setHideOverlay(false);
 			    imp.setImage(capture);
+                            ipr=imp.getProcessor();
 			    //Added 16 07 2018
 			    if(!kl)
 				{
@@ -484,7 +500,7 @@ public void mousePressed(MouseEvent e) {
 			    }
 		    }else
 		    {
-			imp.setSlice(mt+1);
+			// * imp.setSlice(mt+1);
 		    }
 		
 		double distance[]=new double[z];
@@ -502,7 +518,7 @@ public void mousePressed(MouseEvent e) {
 			Line ln=new Line(xi,yi,xf,yf);
 			//drawLine(xi, yi, xf, yf, imp);
 			
-			imp.setSlice(mt);
+			// * imp.setSlice(mt);
 			imp.setRoi(ln,true);		
 			double[] s1=ln.getPixels();
 			int mdel=0;
@@ -545,7 +561,7 @@ public void mousePressed(MouseEvent e) {
 		Analyzer a=new Analyzer(imp);
 		ImageStatistics ist=imp.getStatistics();
 		
-		imp.setSliceWithoutUpdate(mt+1);
+		// * imp.setSliceWithoutUpdate(mt+1);
 		double area=ist.area/(pixelXcm*pixelXcm)*(1.0/(100*100));//area in m^2
 		double stime=(System.currentTimeMillis()-st)/1000.;
 		/*Aggiorna i campioni ECG e JVP*/
@@ -568,29 +584,34 @@ public void mousePressed(MouseEvent e) {
 				    pw.close();
 				plot = new Plot("JVP","Time (s)","Units");
 				plot.setLimits(xLimiInf, t_scale_max, 0, 2);
-				plot.setLineWidth(3);
-				plot.setColor(Color.blue);
+				plot.setLineWidth(2);
+				
 				plot.changeFont(new Font("Helvetica", Font.PLAIN, 24));
 				plot.addLabel(0.15, 0.95, "JVP");
 				plot.changeFont(new Font("Helvetica", Font.PLAIN, 16));
-				plot.setColor(Color.blue);
+				
 				pw=plot.show();
                                 pw.setLocationAndSize(wpx,wpy,wpw,wph);
+                                plot.setSize(wpw, wph);
                                 imp.getWindow().setFocusable(true);
-                                
-                                //imp.getWindow().setRequestFocusEnabled(true);
                                 imp.getWindow().requestFocus();
-                                //imp.getWindow().Focus();
-			    }
+                            }
 			
-			//manager.add(imp,myROI,mt);
-			//a.saveResults(ist,myROI);
+			
 			xp[selInx]=(float)stime;
 			yp[selInx]=(float)area*(10000);//cm^2
-			plot.addPoints(xp, yp,PlotWindow.LINE);
-			plot.addPoints(xp, yp,PlotWindow.X);
-			imp.getWindow().requestFocus();
-			if((selInx<MAXSEL-1)&&stime<9.5)
+                        ep[selInx]=(float)(getECGValue());
+                        plot.setColor(Color.blue);
+                        plot.addPoints(xp, yp,PlotWindow.LINE);
+                        //plot.setColor(Color.black);
+			//plot.addPoints(xp, yp,PlotWindow.X);
+                        if(ecgrecording)
+                            {
+                                plot.setColor(Color.red);
+                                plot.addPoints(xp, ep,PlotWindow.LINE);
+                            }
+                        imp.getWindow().requestFocus();
+                        if((selInx<MAXSEL-1)&&stime<9.5)
 			    selInx++;
 			else
 			    {
@@ -598,26 +619,21 @@ public void mousePressed(MouseEvent e) {
 				selInx=0;
 				xp = new float[MAXSEL]; 
 				yp = new float[MAXSEL];
+                                ep = new float[MAXSEL];
 			    }
 		    }else
 		    {
-			//plot= new Plot("JVP","Time (s)","Units");
-			selInx=0;
+                        selInx=0;
 			fstr=true;
-			
-		    }
-		
-		//plotOverImage(ixp, iyp);
-		
-		//manager.select(0);
+                    }
 		IJ.wait((int)fps);
 		li++;
-	    }
+                }
     }
     }
     
     private void calculateModelParametrs() {
-		// TODO Auto-generated method stub
+        // TODO Auto-generated method stub
     	
     	//identifica gli istanti relativi alle onde "a" ed "R"
     	int i_ecg=findMaxIndex(ecg_cicle);
@@ -626,42 +642,40 @@ public void mousePressed(MouseEvent e) {
     	//csa_x=0.5/10000;
     	double dt=(t_jvp_cicle[i_jvp]-t_ecg_cicle[i_ecg]);
     	if(dt<0)
-    	{
+            {
     		IJ.showMessage("L'intervallo a-R risulta negativo: "+dt);
-    	}
+            }
     	//Calcola la velocità dell'onda di pressione
     	double c=ijv_length/dt;//c deve essere in m/s
     	//Calcola la compliance
     	compliance_xul=csa_x/(rho*c*c);
-    	//IJ.log("dt="+dt+"; csa_x="+csa_x+" C'="+compliance_xul+"; i_jvp="+i_jvp);
-		
-	}
-
-
-	private double findMin(double[] x) {
-		double mx= 1000;
-    	for(int i=0;i<x.length;i++)
-    	{
-    		if(x[i] <mx&&x[i]>0){
-    			mx=x[i];
-    		}
-    	}
-    	return mx;
-	}
-
-
-	private void plotOverImage(int []x,int []y)
-    {
-    	 ImageCanvas ic = imp.getCanvas();
-		 if (ic==null) return;
-		 Graphics g = ic.getGraphics();
-		 
-		 g.setColor(Color.red);
-		 g.drawPolygon (x, y, x.length);
-		 //ovl.add(new PolygonRoi(x, y, x.length, imp, 0));
-		 //imp.setOverlay(ovl);
+   
+	
     }
-  
+    
+    
+    private double findMin(double[] x) {
+        double mx= 1000;
+    	for(int i=0;i<x.length;i++)
+            {
+    		if(x[i] <mx&&x[i]>0){
+                    mx=x[i];
+    		}
+            }
+    	return mx;
+    }
+    
+    
+    private void plotOverImage(int []x,int []y)
+    {
+        ImageCanvas ic = imp.getCanvas();
+        if (ic==null) return;
+        Graphics g = ic.getGraphics();
+	
+        g.setColor(Color.red);
+        g.drawPolygon (x, y, x.length);
+    }
+    
     /*
      * Calcola la nuova roi
      */
@@ -814,11 +828,11 @@ public void mousePressed(MouseEvent e) {
 boolean showSettingsDialog(ImagePlus imp)
     {
 	GenericDialog gd2 = new GenericDialog("Set parameters");
-	gd2.addStringField("Repository",repository);
-	gd2.addStringField("Patient ID",PID);
+	gd2.addStringField("Web repository",repository);
+	gd2.addStringField("Patient or Study ID",PID);
 	gd2.addNumericField("Pixel per cm", pixelXcm, 0);
 	gd2.addNumericField("J (1, or 3)", Jpos, 0);
-	gd2.addNumericField("Acquisition number", videon, 0);
+	gd2.addNumericField("Video number", videon, 0);
 	gd2.addStringField("L/R",LoR);
 
 	gd2.showDialog();
