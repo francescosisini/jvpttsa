@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
 .button {
-    width:200px;
+    width:250px;
     border: 1;
     color: black;
     padding: 15px 32px;
@@ -14,43 +15,58 @@
     cursor: pointer;
 }
 </style>
+    <?php session_start();
+    if($_SESSION['validated']!=true)
+    {
+        echo "<script>window.location.href = 'index.php';</script>";
+    }
+    ?>
 <body>
-
-<div style="height:45px;width:100%;font-size:22;font-family:verdana;background-color:#000000;"><a href='index.php' style="color:white;">Home</a>
-        </div>
-<br><br><br>
-<table>
-<tr>
-<td width=300px>
     
-        <input class=button type="button" onclick="location.href='controller.php?action=uploadFile';" value="Upload" />
-        <!--
-        <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=uploadFile'>Upload</a> </div>
-            -->
-        
-        <input class=button type="button" onclick="location.href='controller.php?action=listsproject';" value="Load" /></li>
-        <!--
-        <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listsproject'>Insert</a></div>
-            -->
-      
-      <input class=button type="button" onclick="location.href='controller.php?action=listAllstudies&project=all';" value="Studies" /></li>
-      <!--
-      <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllstudies&project=all'>Data</a></div>
-          -->
-      
-      <input class=button type="button" onclick="location.href='controller.php?action=listAllreports&project=all';" value="Reports" /></li>
-      <!--
-      <div style="font-size:16;font-family:verdana;"><a href='controller.php?action=listAllreports&project=all'>Reports</a></div>
-          -->
+    <!-- Main menu-->
+    <div class="w3-row  w3-center w3-black">
+        <div class="w3-col s2">
+            <a href='main.php' style="color:white;">
+                <h2>Home</h2>
+            </a>
+        </div>
+        <div class="w3-col s8">&nbsp;</div>
+        <div class="w3-col s2">
+            <a href='imagej.html' style="color:white;">
+                <h2>Install</h2>
+            </a>
+        </div>
+    </div>
+    <!-- Main menu-->
 
-</td>
-<td>
+    
 
-</td>
-</tr>
-</table>
+
+<div class="w3-container">
+  <h2></h2>
+  <p class="w3-large"></p>
+</div>
+<div class="w3-row w3-center w3-green w3-padding-16">
+    
+<input class=button type="button" onclick="location.href='controller.php?action=uploadFile';" value="Upload" />
+
+<input class=button type="button" onclick="location.href='controller.php?action=listsproject';" value="Load" />
+
+<input class=button type="button" onclick="location.href='controller.php?action=listAllstudies&project=all';" value="Studies" />
+
+<input class=button type="button" onclick="location.href='controller.php?action=listAllreports&project=all';" value="Reports" />
+</div>
+</div>
+
+<div class="w3-padding-16" style="width:100%;text-align:center;">
+    <img src="img/map.jpg">       
+</div>
+
+
 <footer><br><br><br><br><br><br><br>
- <small>&copy; 2017 Francesco Sisini </small>
+    <div style="text-align:center;font-family:Arial;">Tekamed-Daa&nbsp;&copy;2018 <a href="http://tekamed.it">Tekamed</a> </div>
+
+   
 </footer>
 </body>
 </html>
